@@ -1,4 +1,4 @@
-package com.skillstorm.SkillStorm;
+package com.skillstorm.skillstorm;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
