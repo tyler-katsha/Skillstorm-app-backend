@@ -1,45 +1,58 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "question")
+@Table(name = "Question")
 public class Question {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    private Integer questionId;
+    private int questionId;
 
-    @Column(name = "answer")
-    private String answer;
-
-    @Column(name = "possible_answers")
-    private String possibleAnswers; // stored as TEXT in schema
-
-    @Column(name = "question_title")
-    private String questionTitle;
+    @Column(name = "text", nullable = false, columnDefinition = "TEXT")
+    private String text;
 
     @Column(name = "score", nullable = false)
-    private int score;
+    private int score = 1;
 
-    public Integer getQuestionId() { return questionId; }
-    public void setQuestionId(Integer questionId) { this.questionId = questionId; }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
+    private Quiz quiz;
 
-    public String getAnswer() { return answer; }
-    public void setAnswer(String answer) { this.answer = answer; }
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Answer> answers;
 
-    public String getPossibleAnswers() { return possibleAnswers; }
-    public void setPossibleAnswers(String possibleAnswers) { this.possibleAnswers = possibleAnswers; }
+    // Constructors, getters, and setters
+    public Question() {}
 
-    public String getQuestionTitle() { return questionTitle; }
-    public void setQuestionTitle(String questionTitle) { this.questionTitle = questionTitle; }
+    public Question(String text, int score, Quiz quiz) {
+        this.text = text;
+        this.score = score;
+        this.quiz = quiz;
+    }
 
+    // Getters and setters
+    public int getQuestionId() { return questionId; }
+    public void setQuestionId(int questionId) { this.questionId = questionId; }
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
     public int getScore() { return score; }
     public void setScore(int score) { this.score = score; }
+    public Quiz getQuiz() { return quiz; }
+    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
+    public List<Answer> getAnswers() { return answers; }
+    public void setAnswers(List<Answer> answers) { this.answers = answers; }
 }

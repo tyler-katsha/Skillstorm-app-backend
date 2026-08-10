@@ -1,15 +1,18 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
 
+    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -18,30 +21,23 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getById(Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+    public User getById(int userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 
-    public List<User> getAll() {
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User update(Integer id, User updated) {
-        User existing = getById(id);
-
-        existing.setUsername(updated.getUsername());
-        existing.setPassword(updated.getPassword());
-        existing.setExperience(updated.getExperience());
-        existing.setLevel(updated.getLevel());
-
-        return userRepository.save(existing);
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 
-    public void delete(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("User not found: " + id);
-        }
-        userRepository.deleteById(id);
+    public void delete(int userId) {
+        userRepository.deleteById(userId);
     }
 }

@@ -1,27 +1,41 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "topic")
+@Table(name = "Topic")
 public class Topic {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "topic_id")
-    private Integer topicId;
+    private int topicId;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
 
-    public Integer getTopicId() { return topicId; }
-    public void setTopicId(Integer topicId) { this.topicId = topicId; }
+    @ManyToMany(mappedBy = "topics")
+    private List<Quiz> quizzes;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    // Constructors, getters, and setters
+    public Topic() {}
+
+    public Topic(String name) {
+        this.name = name;
+    }
+
+    // Getters and setters
+    public int getTopicId() { return topicId; }
+    public void setTopicId(int topicId) { this.topicId = topicId; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public List<Quiz> getQuizzes() { return quizzes; }
+    public void setQuizzes(List<Quiz> quizzes) { this.quizzes = quizzes; }
 }

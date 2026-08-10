@@ -1,6 +1,5 @@
 package com.skillstorm.skillstorm.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -13,51 +12,47 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "user") // reserved keyword, so explicit table name
+@Table(name = "User")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer userId;
+    private int userId;
 
-    @Column(name = "experience", nullable = false)
-    private int experience;
-
-    @Column(name = "level", nullable = false)
-    private int level;
-
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "username")
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Attempt> attempts = new ArrayList<>();
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "xp", nullable = false)
+    private int xp = 0;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Badge> badges = new ArrayList<>();
+    private List<Badge> badges;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Leaderboard> leaderboards = new ArrayList<>();
+    private List<Attempt> attempts;
 
-    public Integer getUserId() { return userId; }
-    public void setUserId(Integer userId) { this.userId = userId; }
+    // Constructors, getters, and setters
+    public User() {}
 
-    public int getExperience() { return experience; }
-    public void setExperience(int experience) { this.experience = experience; }
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
-    public int getLevel() { return level; }
-    public void setLevel(int level) { this.level = level; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
+    // Getters and setters for all fields
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-
-    public List<Attempt> getAttempts() { return attempts; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public int getXp() { return xp; }
+    public void setXp(int xp) { this.xp = xp; }
     public List<Badge> getBadges() { return badges; }
-    public List<Leaderboard> getLeaderboards() { return leaderboards; }
+    public void setBadges(List<Badge> badges) { this.badges = badges; }
+    public List<Attempt> getAttempts() { return attempts; }
+    public void setAttempts(List<Attempt> attempts) { this.attempts = attempts; }
 }
