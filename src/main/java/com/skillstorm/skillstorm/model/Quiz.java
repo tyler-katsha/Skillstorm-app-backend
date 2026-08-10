@@ -39,9 +39,6 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attempt> attempts;
-
     // Constructors, getters, and setters
     public Quiz() {}
 
@@ -61,6 +58,4 @@ public class Quiz {
     public void setTopics(List<Topic> topics) { this.topics = topics; }
     public List<Question> getQuestions() { return questions; }
     public void setQuestions(List<Question> questions) { this.questions = questions; }
-    public List<Attempt> getAttempts() { return attempts; }
-    public void setAttempts(List<Attempt> attempts) { this.attempts = attempts; }
 }
