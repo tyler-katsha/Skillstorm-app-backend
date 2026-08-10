@@ -44,7 +44,7 @@ public class QuizController {
 
     @PutMapping("/{id}")
     public Quiz update(@PathVariable Integer id, @RequestBody Quiz updated) {
-        return quizService.update(id, updated);
+        return quizService.update(updated);
     }
 
     @DeleteMapping("/{id}")

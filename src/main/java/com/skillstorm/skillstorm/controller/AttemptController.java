@@ -50,7 +50,8 @@ public class AttemptController {
 
     @PutMapping("/{id}")
     public Attempt update(@PathVariable Integer id, @RequestBody Attempt updated) {
-        return attemptService.update(id, updated);
+        // TODO: Decide whether it is acceptable to force clients to send the ID in both the path and request body.
+        return attemptService.update(updated);
     }
 
     @DeleteMapping("/{id}")

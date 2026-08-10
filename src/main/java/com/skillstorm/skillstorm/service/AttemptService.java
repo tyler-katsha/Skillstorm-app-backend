@@ -1,24 +1,29 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.Attempt;
+import com.skillstorm.skillstorm.model.Quiz;
+import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.AttemptRepository;
+import com.skillstorm.skillstorm.repository.QuizRepository;
+import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
 public class AttemptService {
     private final AttemptRepository attemptRepository;
-    private final UserRepository userRepository;
     private final QuizRepository quizRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public AttemptService(AttemptRepository attemptRepository, UserRepository userRepository, QuizRepository quizRepository) {
-        this.AttemptRepository = attemptRepository;
-        this.UserRepository = userRepository;
-        this.QuizRepository = quizRepository;
+    public AttemptService(AttemptRepository attemptRepository, QuizRepository quizRepository, UserRepository userRepository) {
+        this.attemptRepository = attemptRepository;
+        this.quizRepository = quizRepository;
+        this.userRepository = userRepository;
     }
 
     public Attempt create(Attempt attempt) {
@@ -26,8 +31,8 @@ public class AttemptService {
     }
 
     public Attempt create(int userId, int quizId, int score, LocalDateTime time) {
-        User user = userRepository.findById(userId);
-        Quiz quiz = quizRepository.findById(quizId);
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow();
         return attemptRepository.save(new Attempt(user, quiz));
     }
 
@@ -35,7 +40,7 @@ public class AttemptService {
         return attemptRepository.findById(attemptId).orElse(null);
     }
 
-    public List<Attempt> getAllAttempts() {
+    public List<Attempt> getAll() {
         return attemptRepository.findAll();
     }
 
@@ -46,7 +51,7 @@ public class AttemptService {
                 .toList();
     }
 
-    public Attempt updateAttempt(Attempt attempt) {
+    public Attempt update(Attempt attempt) {
         return attemptRepository.save(attempt);
     }
 

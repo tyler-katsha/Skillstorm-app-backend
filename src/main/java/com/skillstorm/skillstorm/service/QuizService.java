@@ -25,11 +25,11 @@ public class QuizService {
         return quizRepository.findById(quizId).orElse(null);
     }
 
-    public List<Quiz> getAllQuizzes() {
+    public List<Quiz> getAll() {
         return quizRepository.findAll();
     }
 
-    public Quiz updateQuiz(Quiz quiz) {
+    public Quiz update(Quiz quiz) {
         return quizRepository.save(quiz);
     }
 

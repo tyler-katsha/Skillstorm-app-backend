@@ -25,7 +25,7 @@ public class QuestionService {
         return questionRepository.findById(questionId).orElse(null);
     }
 
-    public List<Question> getAllQuestions() {
+    public List<Question> getAll() {
         return questionRepository.findAll();
     }
 
@@ -36,7 +36,7 @@ public class QuestionService {
                 .toList();
     }
 
-    public Question updateQuestion(Question question) {
+    public Question update(Question question) {
         return questionRepository.save(question);
     }
 

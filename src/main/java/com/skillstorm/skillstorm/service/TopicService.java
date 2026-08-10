@@ -29,11 +29,11 @@ public class TopicService {
         return topicRepository.findByName(name);
     }
 
-    public List<Topic> getAllTopics() {
+    public List<Topic> getAll() {
         return topicRepository.findAll();
     }
 
-    public Topic updateTopic(Topic topic) {
+    public Topic update(Topic topic) {
         return topicRepository.save(topic);
     }
 

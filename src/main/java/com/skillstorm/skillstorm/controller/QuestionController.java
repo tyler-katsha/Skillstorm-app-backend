@@ -44,7 +44,7 @@ public class QuestionController {
 
     @PutMapping("/{id}")
     public Question update(@PathVariable Integer id, @RequestBody Question updated) {
-        return questionService.update(id, updated);
+        return questionService.update(updated);
     }
 
     @DeleteMapping("/{id}")

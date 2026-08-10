@@ -25,7 +25,7 @@ public class AnswerService {
         return answerRepository.findById(answerId).orElse(null);
     }
 
-    public List<Answer> getAllAnswers() {
+    public List<Answer> getAll() {
         return answerRepository.findAll();
     }
 
@@ -36,7 +36,7 @@ public class AnswerService {
                 .toList();
     }
 
-    public Answer updateAnswer(Answer answer) {
+    public Answer update(Answer answer) {
         return answerRepository.save(answer);
     }
 

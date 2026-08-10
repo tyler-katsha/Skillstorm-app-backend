@@ -29,11 +29,11 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         return userRepository.findAll();
     }
 
-    public User updateUser(User user) {
+    public User update(User user) {
         return userRepository.save(user);
     }
 
