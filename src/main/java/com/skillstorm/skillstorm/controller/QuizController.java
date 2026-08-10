@@ -17,7 +17,7 @@ import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.service.QuizService;
 
 @RestController
-@RequestMapping("/api/quiz")
+@RequestMapping("/api/quizzes")
 public class QuizController {
 
     private final QuizService quizService;
