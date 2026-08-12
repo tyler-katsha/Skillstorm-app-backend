@@ -29,7 +29,7 @@ public class Quiz {
     @Column(name = "difficulty", nullable = false)
     private String difficulty; // "Easy", "Medium", "Hard"
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "topic_quiz",
         joinColumns = @JoinColumn(name = "quiz_id"),
@@ -37,7 +37,7 @@ public class Quiz {
     )
     private List<Topic> topics;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Question> questions;
 

@@ -21,6 +21,7 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
+    @JsonIgnore
     private int questionId;
 
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
@@ -34,7 +35,7 @@ public class Question {
     @JsonIgnore
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Answer> answers;
 

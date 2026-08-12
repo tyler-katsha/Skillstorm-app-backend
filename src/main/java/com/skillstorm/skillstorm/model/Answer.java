@@ -1,6 +1,6 @@
 package com.skillstorm.skillstorm.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,11 +16,12 @@ public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "answer_id")
+    @JsonIgnore
     private int answerId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Question question;
 
     @Column(name = "answer_text", nullable = false, columnDefinition = "TEXT")

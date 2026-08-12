@@ -19,6 +19,7 @@ public class Topic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "topic_id")
+    @JsonIgnore
     private int topicId;
 
     @Column(name = "name", nullable = false, unique = true)
