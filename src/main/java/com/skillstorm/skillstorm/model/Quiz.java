@@ -2,8 +2,6 @@ package com.skillstorm.skillstorm.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,7 +36,6 @@ public class Quiz {
     private List<Topic> topics;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
     private List<Question> questions;
 
     // Constructors, getters, and setters
