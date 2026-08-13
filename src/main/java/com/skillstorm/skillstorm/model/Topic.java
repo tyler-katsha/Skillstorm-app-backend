@@ -2,8 +2,6 @@ package com.skillstorm.skillstorm.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,14 +17,12 @@ public class Topic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "topic_id")
-    @JsonIgnore
     private int topicId;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "topics", fetch = FetchType.LAZY)
-    @JsonIgnore
     private List<Quiz> quizzes;
 
     // Constructors, getters, and setters

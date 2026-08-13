@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.service.QuizService;
 
@@ -33,12 +34,12 @@ public class QuizController {
     }
 
     @GetMapping("/{id}")
-    public Quiz getById(@PathVariable Integer id) {
+    public QuizDTO getById(@PathVariable Integer id) {
         return quizService.getById(id);
     }
 
     @GetMapping
-    public List<Quiz> getAll() {
+    public List<QuizDTO> getAll() {
         return quizService.getAll();
     }
 

@@ -2,8 +2,6 @@ package com.skillstorm.skillstorm.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +18,6 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    @JsonIgnore
     private int questionId;
 
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
@@ -31,7 +28,6 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
-    @JsonIgnore
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
