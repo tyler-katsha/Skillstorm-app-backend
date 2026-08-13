@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.skillstorm.skillstorm.model.Answer;
+import com.skillstorm.skillstorm.model.Badge;
 import com.skillstorm.skillstorm.model.Question;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.Topic;
@@ -49,6 +50,13 @@ public class Mapper {
         if (user == null) {
             return null;
         }
-        return new UserDTO(user.getUsername(), user.getXp());
+        List<BadgeDTO> badges = user
+            .getBadges()
+            .stream()
+            .map((Badge badge) -> {
+                return new BadgeDTO(badge.getName(), badge.getDescription());
+            })
+            .toList();
+        return new UserDTO(user.getUsername(), user.getXp(), badges);
     }
 }
