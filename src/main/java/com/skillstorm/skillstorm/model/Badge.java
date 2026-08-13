@@ -18,7 +18,7 @@ public class Badge {
     @Column(name = "achievement_id")
     private int achievementId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

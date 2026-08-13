@@ -22,7 +22,7 @@ public class Topic {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "topics", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "topics", fetch = FetchType.EAGER)
     private List<Quiz> quizzes;
 
     // Constructors, getters, and setters

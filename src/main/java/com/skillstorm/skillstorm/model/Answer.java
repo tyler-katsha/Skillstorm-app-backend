@@ -16,7 +16,7 @@ public class Answer {
     @Column(name = "answer_id")
     private int answerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 

@@ -20,11 +20,11 @@ public class Attempt {
     @Column(name = "attempt_id")
     private int attemptId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 

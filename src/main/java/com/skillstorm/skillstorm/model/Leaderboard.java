@@ -25,7 +25,7 @@ public class Leaderboard {
     @Column(name = "total_score", nullable = false)
     private int totalScore;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 

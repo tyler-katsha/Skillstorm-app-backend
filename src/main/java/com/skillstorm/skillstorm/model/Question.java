@@ -26,7 +26,7 @@ public class Question {
     @Column(name = "score", nullable = false)
     private int score = 1;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
