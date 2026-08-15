@@ -1,0 +1,31 @@
+package com.skillstorm.skillstorm;
+
+import javax.sql.DataSource;
+
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Bean(name = "mysqlDataSource")
+    public DataSource mysqlDataSource() {
+    return DataSourceBuilder.create()
+        .driverClassName("com.mysql.cj.jdbc.Driver")
+        .url("jdbc:mysql://sql7.freesqldatabase.com:3306/sql7826363")
+        .username("<redacted>")
+        .password("<redacted>")
+        .build();
+    }
+
+    @Primary
+    @Bean(name = "sqliteDataSource")
+    public DataSource sqliteDataSource() {
+    return DataSourceBuilder.create()
+        .driverClassName("org.sqlite.JDBC")
+        .url("jdbc:sqlite:./src/main/data/app.db")
+        .build();
+    }
+}
