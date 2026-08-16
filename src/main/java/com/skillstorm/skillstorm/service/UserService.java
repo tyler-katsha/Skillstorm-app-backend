@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,9 @@ public class UserService {
     }
 
     public UserDTO getById(int userId) {
-        return mapper.mapToDto(userRepository.findById(userId).orElseThrow());
+        return mapper.mapToDto(userRepository.findById(userId).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find user by id %d.", userId));
+        }));
     }
 
     public UserDTO getUserByUsername(String username) {

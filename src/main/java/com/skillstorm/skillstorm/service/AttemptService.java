@@ -1,7 +1,8 @@
 package com.skillstorm.skillstorm.service;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,12 @@ public class AttemptService {
     }
 
     public Attempt create(int userId, int quizId, int score, LocalDateTime time) {
-        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
-        User user = userRepository.findById(userId).orElseThrow();
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find quiz by id %d.", quizId));
+        });
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find user by id %d.", userId));
+        });
         return attemptRepository.save(new Attempt(user, quiz));
     }
 

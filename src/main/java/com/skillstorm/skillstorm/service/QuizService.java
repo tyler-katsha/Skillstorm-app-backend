@@ -1,12 +1,13 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.dto.Mapper;
+import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 
@@ -26,7 +27,10 @@ public class QuizService {
     }
 
     public QuizDTO getById(int quizId) {
-        return mapper.mapToDto(quizRepository.findById(quizId).orElseThrow());
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find quiz by id %d.", quizId));
+        });
+        return mapper.mapToDto(quiz);
     }
 
     public List<QuizDTO> getAll() {

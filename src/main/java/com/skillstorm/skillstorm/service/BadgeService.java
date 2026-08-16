@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
@@ -21,9 +22,12 @@ public class BadgeService {
     }
 
     public Badge create(String title, String description, Integer userId) {
-        User user = userId == null ? null : userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-
+        if (userId == null) {
+            throw new NullPointerException("userId is null in call to method `Badge create(String title, String description, Integer userId)`");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find user by id %d.", userId));
+        });
         Badge badge = new Badge();
         badge.setName(title);
         badge.setDescription(description);
@@ -33,8 +37,9 @@ public class BadgeService {
     }
 
     public Badge getById(Integer id) {
-        return badgeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Badge not found: " + id));
+        return badgeRepository.findById(id).orElseThrow(() -> {
+            return new NoSuchElementException(String.format("Could not find badge by id %d.", id));
+        });
     }
 
     public List<Badge> getAll() {
