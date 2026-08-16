@@ -45,8 +45,9 @@ public class BadgeController {
         return badgeService.getAll();
     }
 
-    @PutMapping("/{id}")
-    public Badge update(@PathVariable Integer id, @RequestBody Badge updated) {
+    @PutMapping("/")
+    public Badge update(@RequestBody Badge updated) {
+        int id = updated.getAchievementId();
         return badgeService.update(id, updated);
     }
 
