@@ -1,73 +1,61 @@
 package com.skillstorm.skillstorm.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.Attempt;
-import com.skillstorm.skillstorm.model.Question;
+import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.AttemptRepository;
-import com.skillstorm.skillstorm.repository.QuestionRepository;
+import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
 public class AttemptService {
-
     private final AttemptRepository attemptRepository;
+    private final QuizRepository quizRepository;
     private final UserRepository userRepository;
-    private final QuestionRepository questionRepository;
 
-    public AttemptService(AttemptRepository attemptRepository,
-                           UserRepository userRepository,
-                           QuestionRepository questionRepository) {
+    @Autowired
+    public AttemptService(AttemptRepository attemptRepository, QuizRepository quizRepository, UserRepository userRepository) {
         this.attemptRepository = attemptRepository;
+        this.quizRepository = quizRepository;
         this.userRepository = userRepository;
-        this.questionRepository = questionRepository;
     }
 
-    public Attempt create(Integer userId, Integer questionId, int score, LocalDateTime time) {
-        User user = userId == null ? null : userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-
-        Question question = questionId == null ? null : questionRepository.findById(questionId)
-                .orElseThrow(() -> new IllegalArgumentException("Question not found: " + questionId));
-
-        Attempt attempt = new Attempt();
-        attempt.setUser(user);
-        attempt.setQuestion(question);
-        attempt.setScore(score);
-        attempt.setTime(time != null ? time : LocalDateTime.now());
-
+    public Attempt create(Attempt attempt) {
         return attemptRepository.save(attempt);
     }
 
-    public Attempt getById(Integer id) {
-        return attemptRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Attempt not found: " + id));
+    public Attempt create(int userId, int quizId, int score, LocalDateTime time) {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow();
+        return attemptRepository.save(new Attempt(user, quiz));
+    }
+
+    public Attempt getById(int attemptId) {
+        return attemptRepository.findById(attemptId).orElse(null);
     }
 
     public List<Attempt> getAll() {
         return attemptRepository.findAll();
     }
 
-    public Attempt update(Integer id, Attempt updated) {
-        Attempt existing = getById(id);
-
-        existing.setScore(updated.getScore());
-        existing.setTime(updated.getTime());
-
-        existing.setUser(updated.getUser());
-        existing.setQuestion(updated.getQuestion());
-
-        return attemptRepository.save(existing);
+    public List<Attempt> getAttemptsByQuizId(int quizId) {
+        // Custom query would be better here
+        return attemptRepository.findAll().stream()
+                .filter(a -> a.getQuiz().getQuizId() == quizId)
+                .toList();
     }
 
-    public void delete(Integer id) {
-        if (!attemptRepository.existsById(id)) {
-            throw new IllegalArgumentException("Attempt not found: " + id);
-        }
-        attemptRepository.deleteById(id);
+    public Attempt update(Attempt attempt) {
+        return attemptRepository.save(attempt);
+    }
+
+    public void delete(int attemptId) {
+        attemptRepository.deleteById(attemptId);
     }
 }

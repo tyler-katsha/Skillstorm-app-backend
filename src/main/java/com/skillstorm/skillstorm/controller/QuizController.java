@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.service.QuizService;
 
 @RestController
-@RequestMapping("/api/quiz")
+@RequestMapping("/api/quizzes")
+@CrossOrigin(originPatterns={"http://localhost:[*]"})
 public class QuizController {
 
     private final QuizService quizService;
@@ -33,18 +36,18 @@ public class QuizController {
     }
 
     @GetMapping("/{id}")
-    public Quiz getById(@PathVariable Integer id) {
+    public QuizDTO getById(@PathVariable Integer id) {
         return quizService.getById(id);
     }
 
     @GetMapping
-    public List<Quiz> getAll() {
+    public List<QuizDTO> getAll() {
         return quizService.getAll();
     }
 
     @PutMapping("/{id}")
     public Quiz update(@PathVariable Integer id, @RequestBody Quiz updated) {
-        return quizService.update(id, updated);
+        return quizService.update(updated);
     }
 
     @DeleteMapping("/{id}")

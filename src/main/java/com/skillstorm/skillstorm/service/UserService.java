@@ -1,47 +1,51 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.skillstorm.skillstorm.dto.Mapper;
+import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
+    private final Mapper mapper;
 
-    public UserService(UserRepository userRepository) {
+    @Autowired
+    public UserService(UserRepository userRepository, Mapper mapper) {
         this.userRepository = userRepository;
+        this.mapper = mapper;
     }
 
     public User create(User user) {
         return userRepository.save(user);
     }
 
-    public User getById(Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+    public UserDTO getById(int userId) {
+        return mapper.mapToDto(userRepository.findById(userId).orElseThrow());
     }
 
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public UserDTO getUserByUsername(String username) {
+        return mapper.mapToDto(userRepository.findByUsername(username));
     }
 
-    public User update(Integer id, User updated) {
-        User existing = getById(id);
-
-        existing.setUsername(updated.getUsername());
-        existing.setPassword(updated.getPassword());
-        existing.setExperience(updated.getExperience());
-        existing.setLevel(updated.getLevel());
-
-        return userRepository.save(existing);
+    public List<UserDTO> getAll() {
+        return userRepository
+            .findAll()
+            .stream()
+            .map(mapper::mapToDto)
+            .toList();
     }
 
-    public void delete(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("User not found: " + id);
-        }
-        userRepository.deleteById(id);
+    public User update(User user) {
+        return userRepository.save(user);
+    }
+
+    public void delete(int userId) {
+        userRepository.deleteById(userId);
     }
 }

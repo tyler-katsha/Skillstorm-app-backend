@@ -1,7 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(originPatterns={"http://localhost:[*]"})
 public class UserController {
 
     private final UserService userService;
@@ -31,19 +35,25 @@ public class UserController {
         return userService.create(user);
     }
 
+    @GetMapping("/me")
+    public UserDTO getLoggedInUser() {
+        // TODO: Get user ID from request header
+        return userService.getById(1);
+    }
+
     @GetMapping("/{id}")
-    public User getById(@PathVariable Integer id) {
+    public UserDTO getById(@PathVariable Integer id) {
         return userService.getById(id);
     }
 
     @GetMapping
-    public List<User> getAll() {
+    public List<UserDTO> getAll() {
         return userService.getAll();
     }
 
     @PutMapping("/{id}")
     public User update(@PathVariable Integer id, @RequestBody User updated) {
-        return userService.update(id, updated);
+        return userService.update(updated);
     }
 
     @DeleteMapping("/{id}")

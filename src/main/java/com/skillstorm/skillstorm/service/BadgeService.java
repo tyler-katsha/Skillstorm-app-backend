@@ -25,7 +25,7 @@ public class BadgeService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         Badge badge = new Badge();
-        badge.setTitle(title);
+        badge.setName(title);
         badge.setDescription(description);
         badge.setUser(user);
 
@@ -44,7 +44,7 @@ public class BadgeService {
     public Badge update(Integer id, Badge updated) {
         Badge existing = getById(id);
 
-        existing.setTitle(updated.getTitle());
+        existing.setName(updated.getName());
         existing.setDescription(updated.getDescription());
         existing.setUser(updated.getUser());
 

@@ -44,7 +44,7 @@ public class TopicController {
 
     @PutMapping("/{id}")
     public Topic update(@PathVariable Integer id, @RequestBody Topic updated) {
-        return topicService.update(id, updated);
+        return topicService.update(updated);
     }
 
     @DeleteMapping("/{id}")

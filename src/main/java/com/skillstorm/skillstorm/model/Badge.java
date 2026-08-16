@@ -11,33 +11,39 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "badge")
+@Table(name = "Badge")
 public class Badge {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "badge_id")
-    private Integer badgeId;
+    @Column(name = "achievement_id")
+    private int achievementId;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "title")
-    private String title;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Integer getBadgeId() { return badgeId; }
-    public void setBadgeId(Integer badgeId) { this.badgeId = badgeId; }
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    // Constructors, getters, and setters
+    public Badge() {}
 
+    public Badge(User user, String name, String description) {
+        this.user = user;
+        this.name = name;
+        this.description = description;
+    }
+
+    // Getters and setters
+    public int getAchievementId() { return achievementId; }
+    public void setAchievementId(int achievementId) { this.achievementId = achievementId; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

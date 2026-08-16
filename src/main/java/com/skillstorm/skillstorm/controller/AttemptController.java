@@ -31,11 +31,11 @@ public class AttemptController {
     // Simple endpoint using explicit relationship ids
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Attempt create(@RequestParam(required = false) Integer userId,
-                            @RequestParam(required = false) Integer questionId,
+    public Attempt create(@RequestParam  Integer userId,
+                            @RequestParam Integer quizId,
                             @RequestParam int score,
-                            @RequestParam(required = false) LocalDateTime time) {
-        return attemptService.create(userId, questionId, score, time);
+                            @RequestParam LocalDateTime time) {
+        return attemptService.create(userId, quizId, score, time);
     }
 
     @GetMapping("/{id}")
@@ -50,7 +50,8 @@ public class AttemptController {
 
     @PutMapping("/{id}")
     public Attempt update(@PathVariable Integer id, @RequestBody Attempt updated) {
-        return attemptService.update(id, updated);
+        // TODO: Decide whether it is acceptable to force clients to send the ID in both the path and request body.
+        return attemptService.update(updated);
     }
 
     @DeleteMapping("/{id}")
