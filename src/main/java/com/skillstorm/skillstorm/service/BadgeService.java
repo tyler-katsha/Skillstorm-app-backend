@@ -2,6 +2,11 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.Badge;
@@ -22,7 +27,7 @@ public class BadgeService {
 
     public Badge create(String title, String description, Integer userId) {
         User user = userId == null ? null : userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         Badge badge = new Badge();
         badge.setName(title);
@@ -31,16 +36,20 @@ public class BadgeService {
 
         return badgeRepository.save(badge);
     }
-
+    @Cacheable(cacheNames = "badge",key="#id")
     public Badge getById(Integer id) {
         return badgeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Badge not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Badge not found: " + id));
     }
-
+    @Cacheable(cacheNames = "badge",key="'all'")
     public List<Badge> getAll() {
         return badgeRepository.findAll();
     }
-
+    @CachePut(cacheNames = "badge",key="#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "badge",key="#id"),
+            @CacheEvict(cacheNames = "badge",key="'all'")
+    })
     public Badge update(Integer id, Badge updated) {
         Badge existing = getById(id);
 
@@ -50,10 +59,13 @@ public class BadgeService {
 
         return badgeRepository.save(existing);
     }
-
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "badge",key="#id"),
+            @CacheEvict(cacheNames = "badge",key="'all'")
+    })
     public void delete(Integer id) {
         if (!badgeRepository.existsById(id)) {
-            throw new IllegalArgumentException("Badge not found: " + id);
+            throw new ResourceNotFoundException("Badge not found: " + id);
         }
         badgeRepository.deleteById(id);
     }

@@ -11,14 +11,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "User")
+@Table(name = "user")
+@Data // Getter, Setter, toString, hashCode, etc...
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int userId;
+    private Integer userId;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -34,26 +42,4 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Attempt> attempts;
-
-    // Constructors, getters, and setters
-    public User() {}
-
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    // Getters and setters for all fields
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public int getXp() { return xp; }
-    public void setXp(int xp) { this.xp = xp; }
-    public List<Badge> getBadges() { return badges; }
-    public void setBadges(List<Badge> badges) { this.badges = badges; }
-    public List<Attempt> getAttempts() { return attempts; }
-    public void setAttempts(List<Attempt> attempts) { this.attempts = attempts; }
 }

@@ -2,7 +2,10 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.service.InspectionCacheService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,37 +25,72 @@ import com.skillstorm.skillstorm.service.LeaderboardService;
 public class LeaderboardController {
 
     private final LeaderboardService leaderboardService;
+    private final InspectionCacheService inspectionCacheService;
 
-    public LeaderboardController(LeaderboardService leaderboardService) {
+    public LeaderboardController(LeaderboardService leaderboardService,InspectionCacheService inspectionCacheService) {
         this.leaderboardService = leaderboardService;
+        this.inspectionCacheService = inspectionCacheService;
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Leaderboard create(@RequestParam int rank,
-                               @RequestParam int totalScore,
-                               @RequestParam(required = false) Integer userId) {
-        return leaderboardService.create(rank, totalScore, userId);
+    public ResponseEntity<?> create(@RequestParam int rank, @RequestParam int totalScore, @RequestParam Integer userId) {
+        try{
+            return ResponseEntity.ok(leaderboardService.create(rank, totalScore, userId)); // 200 HTTP STATUS
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
+        }
     }
 
     @GetMapping("/{id}")
-    public Leaderboard getById(@PathVariable Integer id) {
-        return leaderboardService.getById(id);
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
+        try{
+            return ResponseEntity.ok(leaderboardService.getById(id)); // 200 HTTP STATUS
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
+        }
     }
 
     @GetMapping
-    public List<Leaderboard> getAll() {
-        return leaderboardService.getAll();
+    public ResponseEntity<?> getAll() {
+        try{
+            return ResponseEntity.ok(leaderboardService.getAll()); // 200 HTTP STATUS
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
+        }
     }
 
     @PutMapping("/{id}")
-    public Leaderboard update(@PathVariable Integer id, @RequestBody Leaderboard updated) {
-        return leaderboardService.update(id, updated);
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Leaderboard updated) {
+        try{
+            return ResponseEntity.ok(leaderboardService.update(id, updated)); // 200 HTTP STATUS
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
+        }
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Integer id) {
-        leaderboardService.delete(id);
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
+        try{
+            leaderboardService.delete(id);
+            return ResponseEntity.ok("User was deleted successfully"); // 200 HTTP STATUS
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
+        }
+    }
+
+    @GetMapping("/cache")
+    public ResponseEntity<String> cache(){
+        inspectionCacheService.inspectCache("leaderboard");
+        return ResponseEntity.ok("Cache was checked");
     }
 }

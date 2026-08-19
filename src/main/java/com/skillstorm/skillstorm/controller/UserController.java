@@ -2,7 +2,9 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.service.InspectionCacheService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +22,13 @@ import com.skillstorm.skillstorm.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(originPatterns={"http://localhost:[*]"})
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
+    private final InspectionCacheService inspectionCacheService;
+    public UserController(UserService userService,InspectionCacheService inspectionCacheService) {
         this.userService = userService;
+        this.inspectionCacheService = inspectionCacheService;
     }
 
     @PostMapping
@@ -60,5 +62,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
         userService.delete(id);
+    }
+
+    @GetMapping("/cache")
+    public ResponseEntity<String> cache(){
+        inspectionCacheService.inspectCache("user");
+        return ResponseEntity.ok("Cache was checked");
     }
 }

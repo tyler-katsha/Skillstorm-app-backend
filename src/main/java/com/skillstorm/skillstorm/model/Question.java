@@ -2,23 +2,23 @@ package com.skillstorm.skillstorm.model;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "question")
+@Data // Getter, Setter, toString, hashCode, etc...
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    private int questionId;
+    private Integer questionId;
 
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String text;
@@ -32,25 +32,4 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Answer> answers;
-
-    // Constructors, getters, and setters
-    public Question() {}
-
-    public Question(String text, int score, Quiz quiz) {
-        this.text = text;
-        this.score = score;
-        this.quiz = quiz;
-    }
-
-    // Getters and setters
-    public int getQuestionId() { return questionId; }
-    public void setQuestionId(int questionId) { this.questionId = questionId; }
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
-    public int getScore() { return score; }
-    public void setScore(int score) { this.score = score; }
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
-    public List<Answer> getAnswers() { return answers; }
-    public void setAnswers(List<Answer> answers) { this.answers = answers; }
 }

@@ -2,7 +2,9 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.service.InspectionCacheService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +23,11 @@ import com.skillstorm.skillstorm.service.TopicService;
 public class TopicController {
 
     private final TopicService topicService;
+    private final InspectionCacheService inspectionCacheService;
 
-    public TopicController(TopicService topicService) {
+    public TopicController(TopicService topicService,InspectionCacheService inspectionCacheService) {
         this.topicService = topicService;
+        this.inspectionCacheService = inspectionCacheService;
     }
 
     @PostMapping
@@ -51,5 +55,11 @@ public class TopicController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
         topicService.delete(id);
+    }
+
+    @GetMapping("/cache")
+    public ResponseEntity<String> cache(){
+        inspectionCacheService.inspectCache("topic");
+        return ResponseEntity.ok("Cache was checked");
     }
 }
