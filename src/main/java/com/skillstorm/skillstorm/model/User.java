@@ -1,20 +1,22 @@
 package com.skillstorm.skillstorm.model;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skillstorm.skillstorm.utils.RoleHelper;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NullMarked;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "user")
@@ -22,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -31,7 +33,10 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "email",nullable = false,unique = true)
+    private String email;
+
+    @Column(name = "password")
     private String password;
 
     @Column(name = "xp", nullable = false)
@@ -42,4 +47,20 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Attempt> attempts;
+
+    // we are going to separate the role with a delimiter (:,;|)
+    @Column(name = "roles",nullable = false)
+    private String roles;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Override
+    @NullMarked
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return RoleHelper.convertFromStringToSet(roles).stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toSet());
+    }
+
+
 }

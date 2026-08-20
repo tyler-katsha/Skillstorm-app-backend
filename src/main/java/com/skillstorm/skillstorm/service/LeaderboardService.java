@@ -2,7 +2,9 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.LeaderboardDto;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.mappers.LeaderboardMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,10 +21,12 @@ public class LeaderboardService {
 
     private final LeaderboardRepository leaderboardRepository;
     private final UserRepository userRepository;
+    private final LeaderboardMapper leaderboardMapper;
 
-    public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository) {
+    public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository,LeaderboardMapper leaderboardMapper) {
         this.leaderboardRepository = leaderboardRepository;
         this.userRepository = userRepository;
+        this.leaderboardMapper = leaderboardMapper;
     }
     /* We don't create this method more than once for the entire lifecycle of the application.
      We will only update the existing 10 unless we want to keep track and update the entire
@@ -47,7 +51,11 @@ public class LeaderboardService {
     }
 
     @Cacheable(cacheNames = "leaderboard",key="'all'")
-    public List<Leaderboard> getAll() {
+    public List<LeaderboardDto> getAll() {
+        return leaderboardRepository.findAll().stream().map(leaderboardMapper::mapToDto).toList();
+    }
+
+    public List<Leaderboard> findAll() {
         return leaderboardRepository.findAll();
     }
 

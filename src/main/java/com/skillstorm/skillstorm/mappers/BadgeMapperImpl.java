@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BadgeImpl implements BadgeMapper{
+public class BadgeMapperImpl implements BadgeMapper{
 
     @Override
     public List<BadgeDTO> mapToDto(List<Badge> badges) {

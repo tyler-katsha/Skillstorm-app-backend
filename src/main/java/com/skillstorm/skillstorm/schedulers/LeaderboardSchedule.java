@@ -23,10 +23,10 @@ public class LeaderboardSchedule {
         this.leaderboardRepository = leaderboardRepository;
     }
 
-    @Scheduled(cron = "0 0 * * *") // Schedules an update at 12:00AM every day
+    @Scheduled(cron = " 0 0 * * * *") // Schedules an update every hour
     public void updateLeaderboard(){
 
-        List<Leaderboard> existingLeaderboardUsers = leaderboardService.getAll();
+        List<Leaderboard> existingLeaderboardUsers = leaderboardService.findAll();
 
         List<User> users = userService.findTop10ByOrderByXpDesc();
 
@@ -41,9 +41,7 @@ public class LeaderboardSchedule {
 
             leaderboardRepository.save(leaderboard);
 
-            System.out.println(String.format("Finished Processing Rank %d",(i+1)));
         }
 
-        System.out.println("Leader board updated");
     }
 }

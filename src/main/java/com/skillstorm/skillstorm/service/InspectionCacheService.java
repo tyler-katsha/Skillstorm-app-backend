@@ -10,7 +10,7 @@ import java.util.Objects;
 @Service
 public class InspectionCacheService {
     @Autowired
-    private static CacheManager cacheManager;
+    private CacheManager cacheManager;
 
     public void inspectCache(String cacheName){
         Cache cache = cacheManager.getCache(cacheName);

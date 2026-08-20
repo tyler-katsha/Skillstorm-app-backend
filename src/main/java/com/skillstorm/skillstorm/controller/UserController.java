@@ -2,9 +2,13 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,20 +35,16 @@ public class UserController {
         this.inspectionCacheService = inspectionCacheService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        return userService.create(user);
-    }
-
+    // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
-    public UserDTO getLoggedInUser() {
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<UserResponse> getLoggedInUser(@AuthenticationPrincipal UserPrincipal principal) {
         // TODO: Get user ID from request header
-        return userService.getById(1);
+        return ResponseEntity.ok(userService.getById(principal.getUserId()));
     }
 
     @GetMapping("/{id}")
-    public UserDTO getById(@PathVariable Integer id) {
+    public UserResponse getById(@PathVariable Integer id) {
         return userService.getById(id);
     }
 
