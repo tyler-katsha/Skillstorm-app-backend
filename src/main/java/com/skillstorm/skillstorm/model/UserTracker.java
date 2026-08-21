@@ -19,6 +19,10 @@ public class UserTracker {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "id",nullable = false,unique = true)
+    @JoinColumn(name = "user_id",nullable = false,unique = true)
     private User user;
+
+    private Integer quizzesTaken;
+    private Integer quizzesWon;
+    private Integer streak;
 }

@@ -55,7 +55,6 @@ public class AuthenticationController {
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -45,7 +45,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS,"/**")
                         .permitAll()
-                        .requestMatchers("/api/auth/**","/oauth2/**","/error")
+                        .requestMatchers("/api/auth/**","/oauth2/**","/error","/ws/**", "/api/duel/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
@@ -66,7 +66,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:*","http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:[*]","http://localhost:5173","http://localhost:3050"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));

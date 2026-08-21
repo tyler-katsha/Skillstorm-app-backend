@@ -39,28 +39,33 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
         }
 
         // extract data from OAuth Provider like Google, Facebook, etc...
-        String username = oAuth2User.getAttribute("name");
+        String rawName = oAuth2User.getAttribute("name");
+
+        if(rawName == null || rawName.isBlank()){
+            rawName = oAuth2User.getAttribute("login"); // GitHub fallback
+        }
+
+        final String resolvedRawName = rawName;
 
         User user = userRepository.findByEmail(email)
                 .map(existingUser -> {
-
-                    if(username != null && !username.isBlank()){
-                        existingUser.setUsername(username);
-                    }
-
+                    // User already exists; keep existing unique username to avoid overwrite collisions
                     return userRepository.save(existingUser);
                 })
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .xp(0)
-                                .roles(Role.USER + ":")
-                                .username(username)
-                                .email(email)
-                                .createdAt(LocalDateTime.now())
-                                .attempts(List.of())
-                                .badges(List.of())
-                                .build()
-                ));
+                // Generate a collision-free username for the new registration
+                .orElseGet(() -> {
+                    String uniqueUsername = oAuthHelper.generateUniqueUsername(resolvedRawName, email);
+                    return userRepository.save(
+                            User.builder()
+                                    .xp(0)
+                                    .roles(Role.USER + ":")
+                                    .username(uniqueUsername)
+                                    .email(email)
+                                    .createdAt(LocalDateTime.now())
+                                    .attempts(List.of())
+                                    .badges(List.of())
+                                    .build());
+                });
 
         oAuthHelper.issueTokenAndRedirect(request,response,user);
 

@@ -58,6 +58,7 @@ public class UserMapperImpl implements UserMapper{
                 .xp(user.getXp())
                 .attempts(user.getAttempts())
                 .badges(user.getBadges())
+                .createdAt(user.getCreatedAt().toString())
                 .build();
     }
 }
