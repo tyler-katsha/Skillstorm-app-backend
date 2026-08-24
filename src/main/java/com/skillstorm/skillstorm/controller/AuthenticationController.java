@@ -5,6 +5,7 @@ import com.skillstorm.skillstorm.dto.UserRegister;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.InvalidEmailException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
 import com.skillstorm.skillstorm.service.EmailService;
 import com.skillstorm.skillstorm.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,9 @@ public class AuthenticationController {
             }
 
             return ResponseEntity.ok(userService.register(request));
-        } catch (InvalidEmailException e){
+        } catch (UsernameTakenException e){
+            return new ResponseEntity<>("Username already exists",HttpStatus.CONFLICT);
+        }catch (InvalidEmailException e){
             return new ResponseEntity<>("Email domain doesn't exist",HttpStatus.BAD_REQUEST);
         } catch (AuthorizationException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);

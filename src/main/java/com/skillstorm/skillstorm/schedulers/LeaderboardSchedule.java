@@ -5,6 +5,7 @@ import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.LeaderboardRepository;
 import com.skillstorm.skillstorm.service.LeaderboardService;
 import com.skillstorm.skillstorm.service.UserService;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class LeaderboardSchedule {
         this.leaderboardRepository = leaderboardRepository;
     }
 
+    @Retryable(maxRetries = 3,multiplier = 2,delay = 3000) // Retries 3 times before throwing an exception and the first delay is 3secs,then 6secs, then 12secs
     @Scheduled(cron = " 0 0 * * * *") // Schedules an update every hour
     public void updateLeaderboard(){
 

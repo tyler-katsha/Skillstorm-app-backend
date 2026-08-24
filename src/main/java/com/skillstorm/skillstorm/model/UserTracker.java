@@ -21,7 +21,6 @@ public class UserTracker {
     @OneToOne
     @JoinColumn(name = "user_id",nullable = false,unique = true)
     private User user;
-
     private Integer quizzesTaken;
     private Integer quizzesWon;
     private Integer streak;

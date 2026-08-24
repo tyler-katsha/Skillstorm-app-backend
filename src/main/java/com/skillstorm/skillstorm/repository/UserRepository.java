@@ -11,4 +11,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
     List<User> findTop10ByOrderByXpDesc();
     boolean existsByUsername(String username);
+    @Query("SELECT user.username FROM User user")
+    List<String> findAllUsername();
 }

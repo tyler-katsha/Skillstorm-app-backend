@@ -5,14 +5,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.annotations.Beta;
+import com.google.common.hash.BloomFilter;
 import com.skillstorm.skillstorm.dto.UserLogin;
 import com.skillstorm.skillstorm.dto.UserRegister;
 import com.skillstorm.skillstorm.dto.UserResponse;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
 import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
 import com.skillstorm.skillstorm.mappers.UserMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -30,14 +35,23 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtTokenProvider tokenProvider;
+    @Beta
+    private final BloomFilter<String> filter;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper, JwtTokenProvider tokenProvider) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, JwtTokenProvider tokenProvider,BloomFilter<String> filter) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.tokenProvider = tokenProvider;
+        this.filter = filter;
+    }
+
+    @PostConstruct
+    public void init(){
+        List<String> existingUsername = userRepository.findAllUsername();
+        existingUsername.forEach(filter::put);
     }
 
     public String register(UserRegister request) {
@@ -50,10 +64,15 @@ public class UserService {
 
         User user = userMapper.toUser(request);
 
+        if(!isUsernameTaken(user.getUsername())){
+            throw new UsernameTakenException(user.getUsername() + " already exist");
+        }
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
+
+        filter.put(user.getUsername());
 
         return "Account created Successfully";
     }
@@ -108,6 +127,7 @@ public class UserService {
             @CacheEvict(cacheNames = "usernameUsers",key="#user.username"),
             @CacheEvict(cacheNames = "user",key="'all'")
     })
+    @Transactional
     public User update(User user) {
         return userRepository.save(user);
     }
@@ -115,7 +135,16 @@ public class UserService {
             @CacheEvict(cacheNames = "user",key="#userId"),
             @CacheEvict(cacheNames = "user",key="'all'")
     })
+    @Transactional
     public void delete(int userId) {
         userRepository.deleteById(userId);
+    }
+
+    public boolean isUsernameTaken(String username){
+        if(!filter.mightContain(username)){
+            return false;
+        }
+
+        return userRepository.existsByUsername(username);
     }
 }
