@@ -6,13 +6,11 @@ import com.skillstorm.skillstorm.mappers.UserMapper;
 import com.skillstorm.skillstorm.model.Leaderboard;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.LeaderboardRepository;
-import com.skillstorm.skillstorm.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PointService {
-
 
     private final LocalCacheService cacheService;
     private final LeaderboardRepository leaderboardRepository;

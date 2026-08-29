@@ -135,6 +135,7 @@ public class UserService {
             @CacheEvict(cacheNames = "user",key="#userId"),
             @CacheEvict(cacheNames = "user",key="'all'")
     })
+
     @Transactional
     public void delete(int userId) {
         userRepository.deleteById(userId);
