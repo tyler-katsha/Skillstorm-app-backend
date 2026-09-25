@@ -1,12 +1,14 @@
 package com.skillstorm.skillstorm.service;
 
 import com.skillstorm.skillstorm.exceptions.InvalidEmailException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.Record;
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     public boolean hasMXRecord(String email){

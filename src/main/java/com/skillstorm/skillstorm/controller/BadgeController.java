@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.controller;
 import java.util.List;
 
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,15 +22,11 @@ import com.skillstorm.skillstorm.service.BadgeService;
 
 @RestController
 @RequestMapping("/api/badges")
+@RequiredArgsConstructor
 public class BadgeController {
 
     private final BadgeService badgeService;
     private final InspectionCacheService inspectionCacheService;
-
-    public BadgeController(BadgeService badgeService,InspectionCacheService inspectionCacheService) {
-        this.badgeService = badgeService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

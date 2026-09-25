@@ -27,7 +27,7 @@ public class Leaderboard {
     @Column(name = "leaderboard_id")
     private Integer leaderboardId;
 
-    @Column(name = "rank", nullable = false)
+    @Column(name = "`rank`", nullable = false)
     private int rank;
 
     @Column(name = "total_score", nullable = false)

@@ -5,6 +5,7 @@ import java.util.List;
 import com.skillstorm.skillstorm.dto.UserResponse;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,14 +27,11 @@ import com.skillstorm.skillstorm.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final InspectionCacheService inspectionCacheService;
-    public UserController(UserService userService,InspectionCacheService inspectionCacheService) {
-        this.userService = userService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")

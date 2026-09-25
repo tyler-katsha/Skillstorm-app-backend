@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.controller;
 import java.util.List;
 
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,15 +23,11 @@ import com.skillstorm.skillstorm.service.QuizService;
 
 @RestController
 @RequestMapping("/api/quizzes")
+@RequiredArgsConstructor
 public class QuizController {
 
     private final QuizService quizService;
     private final InspectionCacheService inspectionCacheService;
-
-    public QuizController(QuizService quizService,InspectionCacheService inspectionCacheService) {
-        this.quizService = quizService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

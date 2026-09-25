@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -13,12 +14,9 @@ import com.skillstorm.skillstorm.model.Answer;
 import com.skillstorm.skillstorm.repository.AnswerRepository;
 
 @Service
+@RequiredArgsConstructor
 public class AnswerService {
     private final AnswerRepository answerRepository;
-
-    public AnswerService(AnswerRepository answerRepository) {
-        this.answerRepository = answerRepository;
-    }
 
     public Answer createAnswer(Answer answer) {
         return answerRepository.save(answer);

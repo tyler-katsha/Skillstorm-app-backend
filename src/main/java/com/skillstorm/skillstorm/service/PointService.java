@@ -7,20 +7,17 @@ import com.skillstorm.skillstorm.model.Leaderboard;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.LeaderboardRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PointService {
 
     private final LocalCacheService cacheService;
     private final LeaderboardRepository leaderboardRepository;
     private final UserMapper userMapper;
 
-    public PointService(LocalCacheService cacheService,LeaderboardRepository leaderboardRepository,UserMapper userMapper){
-        this.cacheService = cacheService;
-        this.leaderboardRepository = leaderboardRepository;
-        this.userMapper = userMapper;
-    }
 
     @Transactional
     public UserResponse levelUser(int userId,int gainedXp){

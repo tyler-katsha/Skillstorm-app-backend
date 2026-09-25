@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class InspectionCacheService {
     @Autowired
     private CacheManager cacheManager;

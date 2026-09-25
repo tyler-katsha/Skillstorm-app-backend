@@ -1,36 +1,32 @@
 package com.skillstorm.skillstorm.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.skillstorm.skillstorm.enums.GameEventType;
-import com.skillstorm.skillstorm.model.DuelRoom;
-import com.skillstorm.skillstorm.model.Player;
-import com.skillstorm.skillstorm.model.QuestionAttempt;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class GameEventResponse {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class GameEventResponse<T> {
 
-    private final GameEventType gameEventType;
-    private QuestionAttempt attempt;
-    private Player player;
-    private DuelRoom duelRoom;
+    private GameEventType gameEventType;
+    private T payload;
 
     public GameEventResponse(GameEventType gameEventType) {
         this.gameEventType = gameEventType;
+        this.payload = null;
     }
 
-    public GameEventResponse(GameEventType gameEventType, QuestionAttempt attempt) {
-        this.gameEventType = gameEventType;
-        this.attempt = attempt;
+    public static <T> GameEventResponse<T> of(GameEventType type, T payload) {
+        return new GameEventResponse<>(type, payload);
     }
 
-    public GameEventResponse(GameEventType gameEventType, Player winner) {
-        this.gameEventType = gameEventType;
-        this.player = winner;
-    }
-
-
-    public GameEventResponse(GameEventType gameEventType, DuelRoom duelRoom) {
-        this.gameEventType = gameEventType;
-        this.duelRoom = duelRoom;
+    public static GameEventResponse<Void> of(GameEventType type) {
+        return new GameEventResponse<>(type, null);
     }
 }

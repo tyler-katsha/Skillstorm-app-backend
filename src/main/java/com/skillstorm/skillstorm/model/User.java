@@ -3,11 +3,13 @@ package com.skillstorm.skillstorm.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.skillstorm.skillstorm.utils.RoleHelper;
+import com.skillstorm.skillstorm.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +30,7 @@ public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer userId;
+    private int userId;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -40,17 +42,23 @@ public class User implements UserDetails, Serializable {
     private String password;
 
     @Column(name = "xp", nullable = false)
+    @Builder.Default
     private int xp = 0;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Badge> badges;
+    @Builder.Default
+    private Set<Badge> badges = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Attempt> attempts;
+    @Builder.Default
+    private Set<Attempt> attempts = new HashSet<>();
 
-    // we are going to separate the role with a delimiter (:,;|)
-    @Column(name = "roles",nullable = false)
-    private String roles;
+    @Column(name = "roles", nullable = false)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    private Set<Role> roles = Set.of(Role.USER);
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -59,7 +67,7 @@ public class User implements UserDetails, Serializable {
     @NullMarked
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return RoleHelper.convertFromStringToSet(roles).stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toSet());
+        return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toSet());
     }
 
 

@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.skillstorm.skillstorm.model.Topic;
 
 public interface TopicRepository extends JpaRepository<Topic, Integer> {
-    public Topic findByName (String name);
+    Topic findByName (String name);
 }

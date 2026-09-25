@@ -2,7 +2,6 @@ package com.skillstorm.skillstorm.jwts;
 
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.User;
-import com.skillstorm.skillstorm.utils.RoleHelper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -30,7 +29,7 @@ public class JwtTokenProvider {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId",user.getUserId());
         claims.put("email",user.getEmail());
-        claims.put("roles", RoleHelper.convertFromStringToSet(user.getRoles()));
+        claims.put("roles", user.getRoles());
 
         return Jwts.builder()
                 .claims(claims)

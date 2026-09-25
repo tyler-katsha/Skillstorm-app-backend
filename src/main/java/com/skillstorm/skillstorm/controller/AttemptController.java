@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,15 +23,12 @@ import com.skillstorm.skillstorm.service.AttemptService;
 
 @RestController
 @RequestMapping("/api/attempts")
+@RequiredArgsConstructor
 public class AttemptController {
 
     private final AttemptService attemptService;
     private final InspectionCacheService inspectionCacheService;
 
-    public AttemptController(AttemptService attemptService,InspectionCacheService inspectionCacheService) {
-        this.attemptService = attemptService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     // Simple endpoint using explicit relationship ids
     @PostMapping

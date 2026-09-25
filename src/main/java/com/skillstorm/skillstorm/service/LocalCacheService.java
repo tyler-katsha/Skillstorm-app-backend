@@ -2,12 +2,14 @@ package com.skillstorm.skillstorm.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 public class LocalCacheService {
 
     private final Cache<String,Object> cache = Caffeine.newBuilder()

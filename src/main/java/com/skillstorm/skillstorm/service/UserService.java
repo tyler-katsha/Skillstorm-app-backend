@@ -18,6 +18,7 @@ import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
 import com.skillstorm.skillstorm.mappers.UserMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -31,22 +32,15 @@ import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtTokenProvider tokenProvider;
-    @Beta
     private final BloomFilter<String> filter;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
-    @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper, JwtTokenProvider tokenProvider,BloomFilter<String> filter) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.tokenProvider = tokenProvider;
-        this.filter = filter;
-    }
 
     @PostConstruct
     public void init(){
@@ -100,6 +94,7 @@ public class UserService {
 
         return userMapper.mapToResponse(existingUser);
     }
+
     @Cacheable(cacheNames = "emailUsers",key="#email")
     public UserDTO findByEmail(String email) {
         User existingUser = userRepository.findByEmail(email)
@@ -107,6 +102,7 @@ public class UserService {
 
         return userMapper.mapToDto(existingUser);
     }
+
     @Cacheable(cacheNames = "user",key="'all'")
     public List<UserDTO> getAll() {
         return userRepository

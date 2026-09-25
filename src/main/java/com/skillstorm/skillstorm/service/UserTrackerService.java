@@ -4,31 +4,32 @@ import com.skillstorm.skillstorm.dto.UserTrackerRequest;
 import com.skillstorm.skillstorm.dto.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.UserTrackerMapper;
+import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.model.UserTracker;
+import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import com.skillstorm.skillstorm.repository.UserTrackerRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
+@RequiredArgsConstructor
 public class UserTrackerService {
 
     private final UserTrackerRepository userTrackerRepository;
     private final UserRepository userRepository;
+    private final QuizRepository quizRepository;
     private final PointService pointService;
     private final UserTrackerMapper mapper;
 
-    public UserTrackerService(UserTrackerRepository userTrackerRepository,UserRepository userRepository,PointService pointService,UserTrackerMapper mapper){
-        this.userTrackerRepository = userTrackerRepository;
-        this.pointService = pointService;
-        this.userRepository = userRepository;
-        this.mapper = mapper;
-    }
-
     @Transactional
     public UserTrackerResponse createTracker(UserTrackerRequest request){
-
 
         UserTracker tracker = mapper.mapBackToObj(request);
 
@@ -36,11 +37,13 @@ public class UserTrackerService {
                         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         tracker.setUser(user);
+
         int gainedXp = request.getGainedXp();
 
         pointService.levelUser(request.getUserId(),gainedXp);
 
         userTrackerRepository.save(tracker);
+
         return mapper.mapToDto(tracker);
     }
 
@@ -74,7 +77,7 @@ public class UserTrackerService {
             tracker.setPerfectQuizzes(tracker.getPerfectQuizzes() + 1);
         }
 
-        // 2. Update Question-Level Metrics
+        // Update Question-Level Metrics
         if (request.getQuestionsAnswered() != null) {
             tracker.setTotalQuestionsAnswered(tracker.getTotalQuestionsAnswered() + request.getQuestionsAnswered());
         }
@@ -85,14 +88,14 @@ public class UserTrackerService {
             tracker.setTotalTimeSpentSeconds(tracker.getTotalTimeSpentSeconds() + request.getTimeSpentSeconds());
         }
 
-        // 3. Update XP and Level
+        // Update XP and Level
         if (request.getGainedXp() != null && request.getGainedXp() > 0) {
             tracker.setTotalXp(tracker.getTotalXp() + request.getGainedXp());
-            // Simple level formula: Level = 1 + (totalXp / 1000)
+            // formula: Level = 1 + (totalXp / 1000)
             tracker.setCurrentLevel(1 + (tracker.getTotalXp() / 1000));
         }
 
-        // 4. Update Daily Streak & Activity Date
+        // Update Daily Streak & Activity Date
         LocalDate today = LocalDate.now();
         LocalDate lastActive = tracker.getLastActiveDate();
 
@@ -111,7 +114,7 @@ public class UserTrackerService {
         }
         tracker.setLastActiveDate(today);
 
-        // 5. Update Quiz Relationships
+        // Update Quiz Relationships
         if (request.getCompletedQuizId() != null) {
             Quiz completedQuiz = quizRepository.findById(request.getCompletedQuizId())
                     .orElseThrow(() -> new ResourceNotFoundException("Quiz not found: " + request.getCompletedQuizId()));

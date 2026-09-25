@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.controller;
 import java.util.List;
 
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,15 +21,11 @@ import com.skillstorm.skillstorm.service.QuestionService;
 
 @RestController
 @RequestMapping("/api/questions")
+@RequiredArgsConstructor
 public class QuestionController {
 
     private final QuestionService questionService;
     private final InspectionCacheService inspectionCacheService;
-
-    public QuestionController(QuestionService questionService,InspectionCacheService inspectionCacheService) {
-        this.questionService = questionService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

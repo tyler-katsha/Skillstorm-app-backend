@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,15 +24,11 @@ import com.skillstorm.skillstorm.service.LeaderboardService;
 
 @RestController
 @RequestMapping("/api/leaderboard")
+@RequiredArgsConstructor
 public class LeaderboardController {
 
     private final LeaderboardService leaderboardService;
     private final InspectionCacheService inspectionCacheService;
-
-    public LeaderboardController(LeaderboardService leaderboardService,InspectionCacheService inspectionCacheService) {
-        this.leaderboardService = leaderboardService;
-        this.inspectionCacheService = inspectionCacheService;
-    }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestParam int rank, @RequestParam int totalScore, @RequestParam Integer userId) {

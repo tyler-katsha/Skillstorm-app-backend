@@ -10,6 +10,6 @@ import java.util.Set;
 
 @Mapper(componentModel="spring")
 public interface QuestionMapper {
-    List<QuestionDTO> mapToDto(List<Question> questions);
-    Set<QuizSummaryDto> mapToSummaryDto(List<Question> questions);
+    Set<QuestionDTO> mapToDto(Set<Question> questions);
+    Set<QuizSummaryDto> mapToSummaryDto(Set<Question> questions);
 }

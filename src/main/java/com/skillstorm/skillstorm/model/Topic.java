@@ -1,6 +1,8 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,5 +33,6 @@ public class Topic {
     private String name;
 
     @ManyToMany(mappedBy = "topics", fetch = FetchType.EAGER)
-    private List<Quiz> quizzes;
+    @Builder.Default
+    private Set<Quiz> quizzes = new HashSet<>();
 }

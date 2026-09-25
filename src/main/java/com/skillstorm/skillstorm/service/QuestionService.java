@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.service;
 import java.util.List;
 
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -14,13 +15,9 @@ import com.skillstorm.skillstorm.model.Question;
 import com.skillstorm.skillstorm.repository.QuestionRepository;
 
 @Service
+@RequiredArgsConstructor
 public class QuestionService {
     private final QuestionRepository questionRepository;
-
-    @Autowired
-    public QuestionService(QuestionRepository questionRepository) {
-        this.questionRepository = questionRepository;
-    }
 
     public Question create(Question question) {
         return questionRepository.save(question);

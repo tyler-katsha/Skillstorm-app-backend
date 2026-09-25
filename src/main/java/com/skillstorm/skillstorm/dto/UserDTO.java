@@ -1,5 +1,5 @@
 package com.skillstorm.skillstorm.dto;
 
-import java.util.List;
+import java.util.Set;
 
-public record UserDTO (String username, int xp, List<BadgeDTO> badges) {}
+public record UserDTO (String username, int xp, Set<BadgeDTO> badges) {}

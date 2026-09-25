@@ -1,6 +1,8 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,14 +28,17 @@ public class Quiz {
     @Column(name = "difficulty", nullable = false)
     private String difficulty; // "Easy", "Medium", "Hard"
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
-        name = "topic_quiz",
-        joinColumns = @JoinColumn(name = "quiz_id"),
-        inverseJoinColumns = @JoinColumn(name = "topic_id")
+            name = "topic_quiz",
+            joinColumns = @JoinColumn(name = "quiz_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"quiz_id", "topic_id"})
     )
-    private List<Topic> topics;
+    @Builder.Default
+    private Set<Topic> topics = new HashSet<>();
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Question> questions;
+    @Builder.Default
+    private Set<Question> questions = new HashSet<>();
 }

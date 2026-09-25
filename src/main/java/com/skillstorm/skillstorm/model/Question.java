@@ -1,6 +1,8 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,5 +33,6 @@ public class Question {
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Answer> answers;
+    @Builder.Default
+    private Set<Answer> answers = new HashSet<>();
 }

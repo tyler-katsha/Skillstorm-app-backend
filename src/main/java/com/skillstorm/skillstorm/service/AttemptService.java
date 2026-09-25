@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.service;
 import java.util.List;
 import java.time.LocalDateTime;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -18,16 +19,11 @@ import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class AttemptService {
     private final AttemptRepository attemptRepository;
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
-
-    public AttemptService(AttemptRepository attemptRepository, QuizRepository quizRepository, UserRepository userRepository) {
-        this.attemptRepository = attemptRepository;
-        this.quizRepository = quizRepository;
-        this.userRepository = userRepository;
-    }
 
     public Attempt create(Attempt attempt) {
         return attemptRepository.save(attempt);

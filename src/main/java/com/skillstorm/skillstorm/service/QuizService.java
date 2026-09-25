@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.QuizMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -16,15 +17,11 @@ import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 
 @Service
+@RequiredArgsConstructor
 public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizMapper quizMapper;
 
-    @Autowired
-    public QuizService (QuizRepository quizRepository, QuizMapper quizMapper) {
-        this.quizRepository = quizRepository;
-        this.quizMapper = quizMapper;
-    }
 
     public Quiz create(Quiz quiz) {
         return quizRepository.save(quiz);

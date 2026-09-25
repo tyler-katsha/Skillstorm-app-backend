@@ -4,6 +4,7 @@ public enum GameEventType {
     PLAYER_JOINED,      // Someone entered the room
     PLAYER_LEFT,        // Someone disconnected or left
     PLAYER_READY,       // User toggled ready status
+    PLAYER_UNREADY,     // User toggled ready status
     GAME_STARTED,       // Host hit start, sending the first question
     ANSWER_SUBMITTED,   // A player locked in an answer
     SCORE_UPDATE,       // Live scoreboard refresh sent to both

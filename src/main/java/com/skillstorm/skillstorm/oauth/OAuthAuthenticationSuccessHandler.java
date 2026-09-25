@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -31,7 +32,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
 
-        String email = oAuth2User.getAttribute("email");
+        String email = oAuth2User != null ? oAuth2User.getAttribute("email") : null;
 
         if(email == null || email.isBlank()){
             oAuthHelper.handleExceptionRedirect(request, response, "oauth_cancelled");
@@ -58,12 +59,12 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
                     return userRepository.save(
                             User.builder()
                                     .xp(0)
-                                    .roles(Role.USER + ":")
+                                    .roles(Set.of(Role.USER))
                                     .username(uniqueUsername)
                                     .email(email)
                                     .createdAt(LocalDateTime.now())
-                                    .attempts(List.of())
-                                    .badges(List.of())
+                                    .attempts(Set.of())
+                                    .badges(Set.of())
                                     .build());
                 });
 

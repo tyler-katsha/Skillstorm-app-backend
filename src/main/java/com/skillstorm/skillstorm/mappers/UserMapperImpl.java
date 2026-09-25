@@ -6,12 +6,11 @@ import com.skillstorm.skillstorm.dto.UserRegister;
 import com.skillstorm.skillstorm.dto.UserResponse;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.User;
-import com.skillstorm.skillstorm.utils.RoleHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Component
 public class UserMapperImpl implements UserMapper{
@@ -25,15 +24,14 @@ public class UserMapperImpl implements UserMapper{
             throw new IllegalArgumentException("Unable to process User Object");
         }
 
-        String role = String.valueOf(Role.USER);
         return User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .xp(0)
-                .attempts(List.of())
-                .roles(role + ":")
-                .badges(List.of())
+                .attempts(Set.of())
+                .roles(Set.of(Role.USER))
+                .badges(Set.of())
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -44,7 +42,7 @@ public class UserMapperImpl implements UserMapper{
             throw new IllegalArgumentException("Unable to process User Object");
         }
 
-        List<BadgeDTO> badges = badgeMapper.mapToDto(user.getBadges());
+        Set<BadgeDTO> badges = badgeMapper.mapToDto(user.getBadges());
 
         return new UserDTO(user.getUsername(),user.getXp(),badges);
     }
@@ -54,7 +52,7 @@ public class UserMapperImpl implements UserMapper{
         return UserResponse.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .roles(RoleHelper.convertFromStringToSet(user.getRoles()))
+                .roles(user.getRoles())
                 .xp(user.getXp())
                 .attempts(user.getAttempts())
                 .badges(user.getBadges())

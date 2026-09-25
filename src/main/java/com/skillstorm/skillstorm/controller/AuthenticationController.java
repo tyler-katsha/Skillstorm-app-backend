@@ -8,6 +8,7 @@ import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
 import com.skillstorm.skillstorm.service.EmailService;
 import com.skillstorm.skillstorm.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,15 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
     private final UserService userService;
     private final EmailService emailService;
 
-    public AuthenticationController(UserService service,EmailService emailService){
-        this.userService = service;
-        this.emailService = emailService;
-    }
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegister request){
         try{

@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.service;
 import java.util.List;
 
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,15 +16,11 @@ import com.skillstorm.skillstorm.repository.BadgeRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class BadgeService {
 
     private final BadgeRepository badgeRepository;
     private final UserRepository userRepository;
-
-    public BadgeService(BadgeRepository badgeRepository, UserRepository userRepository) {
-        this.badgeRepository = badgeRepository;
-        this.userRepository = userRepository;
-    }
 
     public Badge create(String title, String description, Integer userId) {
         User user = userId == null ? null : userRepository.findById(userId)
@@ -36,6 +33,7 @@ public class BadgeService {
 
         return badgeRepository.save(badge);
     }
+
     @Cacheable(cacheNames = "badge",key="#id")
     public Badge getById(Integer id) {
         return badgeRepository.findById(id)

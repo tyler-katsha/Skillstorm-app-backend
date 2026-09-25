@@ -5,6 +5,7 @@ import java.util.List;
 import com.skillstorm.skillstorm.dto.LeaderboardDto;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.LeaderboardMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,17 +18,13 @@ import com.skillstorm.skillstorm.repository.LeaderboardRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class LeaderboardService {
 
     private final LeaderboardRepository leaderboardRepository;
     private final UserRepository userRepository;
     private final LeaderboardMapper leaderboardMapper;
 
-    public LeaderboardService(LeaderboardRepository leaderboardRepository, UserRepository userRepository,LeaderboardMapper leaderboardMapper) {
-        this.leaderboardRepository = leaderboardRepository;
-        this.userRepository = userRepository;
-        this.leaderboardMapper = leaderboardMapper;
-    }
     /* We don't create this method more than once for the entire lifecycle of the application.
      We will only update the existing 10 unless we want to keep track and update the entire
      ranking system and keep track of the ranking's for all user's */

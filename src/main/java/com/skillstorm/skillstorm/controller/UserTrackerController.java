@@ -1,10 +1,10 @@
 package com.skillstorm.skillstorm.controller;
 
 import com.skillstorm.skillstorm.dto.UserTrackerRequest;
-import com.skillstorm.skillstorm.dto.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.UserTrackerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,13 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/user-history")
+@RequiredArgsConstructor
 public class UserTrackerController {
 
     private final UserTrackerService userTrackerService;
-
-    public UserTrackerController(UserTrackerService userTrackerService){
-        this.userTrackerService = userTrackerService;
-    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN')")
