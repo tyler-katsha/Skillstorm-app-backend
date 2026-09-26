@@ -19,7 +19,6 @@ import java.util.List;
 @Slf4j
 public class LeaderboardSchedule {
 
-    private final LeaderboardService leaderboardService;
     private final UserService userService;
     private final LeaderboardRepository leaderboardRepository;
 

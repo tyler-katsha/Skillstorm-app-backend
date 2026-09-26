@@ -6,6 +6,7 @@ import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,32 +30,38 @@ public class TopicController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Topic create(@RequestBody Topic topic) {
         return topicService.create(topic);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public Topic getById(@PathVariable Integer id) {
         return topicService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<Topic> getAll() {
         return topicService.getAll();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Topic update(@PathVariable Integer id, @RequestBody Topic updated) {
         return topicService.update(updated);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Integer id) {
         topicService.delete(id);
     }
 
     @GetMapping("/cache")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("topic");
         return ResponseEntity.ok("Cache was checked");

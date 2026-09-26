@@ -11,17 +11,16 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class InspectionCacheService {
-    @Autowired
-    private CacheManager cacheManager;
 
-    public void inspectCache(String cacheName){
+    private final CacheManager cacheManager;
+
+    public String inspectCache(String cacheName){
         Cache cache = cacheManager.getCache(cacheName);
 
         if(cache != null){
-            System.out.println("Cache: ");
-            System.out.println(Objects.requireNonNull(cache.getNativeCache()));
+            return "Cache:\n" + Objects.requireNonNull(cache.getNativeCache());
         } else{
-            System.out.println("No cache found with name: " + cacheName);
+            return "No cache found with name: " + cacheName;
         }
     }
 }

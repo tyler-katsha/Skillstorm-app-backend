@@ -6,6 +6,7 @@ import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,32 +32,38 @@ public class QuizController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Quiz create(@RequestBody Quiz quiz) {
         return quizService.create(quiz);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public QuizDTO getById(@PathVariable Integer id) {
         return quizService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<QuizDTO> getAll() {
         return quizService.getAll();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Quiz update(@PathVariable Integer id, @RequestBody Quiz updated) {
         return quizService.update(updated);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Integer id) {
         quizService.delete(id);
     }
 
     @GetMapping("/cache")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("quiz");
         return ResponseEntity.ok("Cache was checked");

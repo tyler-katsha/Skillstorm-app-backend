@@ -58,7 +58,7 @@ public class UserService {
 
         User user = userMapper.toUser(request);
 
-        if(!isUsernameTaken(user.getUsername())){
+        if(isUsernameTaken(user.getUsername())){
             throw new UsernameTakenException(user.getUsername() + " already exist");
         }
         // hashes the password

@@ -36,12 +36,10 @@ public class AuthenticationController {
             }
 
             return ResponseEntity.ok(userService.register(request));
-        } catch (UsernameTakenException e){
-            return new ResponseEntity<>("Username already exists",HttpStatus.CONFLICT);
+        } catch (UsernameTakenException | AuthorizationException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         }catch (InvalidEmailException e){
             return new ResponseEntity<>("Email domain doesn't exist",HttpStatus.BAD_REQUEST);
-        } catch (AuthorizationException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
         } catch (ResourceNotFoundException e){
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch(Exception e){

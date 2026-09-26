@@ -42,27 +42,32 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public UserResponse getById(@PathVariable Integer id) {
         return userService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAll() {
         return userService.getAll();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public User update(@PathVariable Integer id, @RequestBody User updated) {
         return userService.update(updated);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public void delete(@PathVariable Integer id) {
         userService.delete(id);
     }
 
     @GetMapping("/cache")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("user");
         return ResponseEntity.ok("Cache was checked");

@@ -11,8 +11,7 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target="password",ignore = true)
-    @Mapping(target = "username")
-    @Mapping(target = "roles",constant = "USER:") // allow me in the future to concat later with specifying :EMPLOYEE just EMPLOYEE
+    @Mapping(target = "roles",constant = "ROLE_USER")
     User toUser(UserRegister request);
 
     UserDTO mapToDto(User user);

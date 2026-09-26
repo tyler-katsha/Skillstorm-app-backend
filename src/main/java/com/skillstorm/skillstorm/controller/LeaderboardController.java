@@ -31,6 +31,7 @@ public class LeaderboardController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> create(@RequestParam int rank, @RequestParam int totalScore, @RequestParam Integer userId) {
         try{
             return ResponseEntity.ok(leaderboardService.create(rank, totalScore, userId)); // 200 HTTP STATUS
@@ -42,6 +43,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
         try{
             return ResponseEntity.ok(leaderboardService.getById(id)); // 200 HTTP STATUS
@@ -65,6 +67,7 @@ public class LeaderboardController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Leaderboard updated) {
         try{
             return ResponseEntity.ok(leaderboardService.update(id, updated)); // 200 HTTP STATUS
@@ -76,6 +79,7 @@ public class LeaderboardController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Integer id) {
         try{
             leaderboardService.delete(id);
@@ -88,8 +92,9 @@ public class LeaderboardController {
     }
 
     @GetMapping("/cache")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("leaderboard");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("leaderboard");
+        return ResponseEntity.ok( result+ "\nCache was checked");
     }
 }

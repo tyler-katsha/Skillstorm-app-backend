@@ -7,6 +7,7 @@ import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class AttemptController {
     // Simple endpoint using explicit relationship ids
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Attempt create(@RequestParam  Integer userId,
                             @RequestParam Integer quizId,
                             @RequestParam int score,
@@ -41,16 +43,19 @@ public class AttemptController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public Attempt getById(@PathVariable Integer id) {
         return attemptService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<Attempt> getAll() {
         return attemptService.getAll();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Attempt update(@PathVariable Integer id, @RequestBody Attempt updated) {
         // TODO: Decide whether it is acceptable to force clients to send the ID in both the path and request body.
         return attemptService.update(updated);
@@ -58,11 +63,13 @@ public class AttemptController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Integer id) {
         attemptService.delete(id);
     }
 
     @GetMapping("/cache")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("attempt");
         return ResponseEntity.ok("Cache was checked");
