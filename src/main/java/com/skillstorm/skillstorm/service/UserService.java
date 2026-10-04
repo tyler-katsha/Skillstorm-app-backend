@@ -7,9 +7,8 @@ import java.util.Optional;
 
 import com.google.common.annotations.Beta;
 import com.google.common.hash.BloomFilter;
-import com.skillstorm.skillstorm.dto.UserLogin;
-import com.skillstorm.skillstorm.dto.UserRegister;
-import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.enums.FilterType;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
@@ -27,7 +26,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
@@ -37,15 +35,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtTokenProvider tokenProvider;
-    private final BloomFilter<String> filter;
+    private final BloomFilter<String> usernameFilter;
+    private final BloomFilter<String> emailFilter;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
 
     @PostConstruct
     public void init(){
-        List<String> existingUsername = userRepository.findAllUsername();
-        existingUsername.forEach(filter::put);
+        List<String> existingUsernames = userRepository.findAllUsername();
+        existingUsernames.forEach(usernameFilter::put);
+
+        List<String> existingEmails = userRepository.findAllEmail();
+        existingEmails.forEach(emailFilter::put);
     }
 
     public String register(UserRegister request) {
@@ -66,7 +68,8 @@ public class UserService {
 
         userRepository.save(user);
 
-        filter.put(user.getUsername());
+        usernameFilter.put(user.getUsername());
+        emailFilter.put(user.getEmail());
 
         return "Account created Successfully";
     }
@@ -137,11 +140,19 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public boolean isUsernameTaken(String username){
-        if(!filter.mightContain(username)){
-            return false;
-        }
-
+    public boolean takenType(FilterType type, String val){
+        return switch(type) {
+            case EMAIL -> isEmailTaken(val);
+            case USERNAME -> isUsernameTaken(val);
+        };
+    }
+    private boolean isUsernameTaken(String username){
+        if(!usernameFilter.mightContain(username)) return false;
         return userRepository.existsByUsername(username);
+    }
+
+    private boolean isEmailTaken(String email){
+        if(!emailFilter.mightContain(email)) return false;
+        return userRepository.existsByEmail(email);
     }
 }

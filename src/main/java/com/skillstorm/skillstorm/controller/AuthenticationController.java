@@ -1,7 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
+import com.skillstorm.skillstorm.dto.BloomUser;
 import com.skillstorm.skillstorm.dto.UserLogin;
 import com.skillstorm.skillstorm.dto.UserRegister;
+import com.skillstorm.skillstorm.enums.FilterType;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.InvalidEmailException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
@@ -11,10 +13,7 @@ import com.skillstorm.skillstorm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -57,4 +56,16 @@ public class AuthenticationController {
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/bloom")
+    public ResponseEntity<?> bloomFilter(@RequestBody BloomUser bloom){
+
+        try{
+            var type = FilterType.valueOf(bloom.getType());
+            return ResponseEntity.ok(userService.takenType(type,bloom.getValue()));
+        } catch(Exception e){
+            return new ResponseEntity<>("Internal Server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
