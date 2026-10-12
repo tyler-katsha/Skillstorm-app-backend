@@ -1,63 +1,96 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.AnswerDTO;
-import com.skillstorm.skillstorm.dto.QuestionDTO;
-import com.skillstorm.skillstorm.dto.QuizSummaryDto;
+import com.skillstorm.skillstorm.dto.AnswerResponse;
+import com.skillstorm.skillstorm.dto.CreateQuestionRequest;
+import com.skillstorm.skillstorm.dto.QuestionResponse;
+import com.skillstorm.skillstorm.model.Answer;
 import com.skillstorm.skillstorm.model.Question;
-import com.skillstorm.skillstorm.model.Quiz;
-import com.skillstorm.skillstorm.model.Topic;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class QuestionMapperImpl implements QuestionMapper{
-
-    @Autowired
-    private AnswerMapper answerMapper;
+public class QuestionMapperImpl implements QuestionMapper {
 
     @Override
-    public Set<QuestionDTO> mapToDto(Set<Question> questions) {
-        return questions.stream()
-                .map(question -> {
+    public QuestionResponse toDto(Question question) {
 
-                    Set<AnswerDTO> dtos = answerMapper.mapToDto(question.getAnswers());
-                    return new QuestionDTO(question.getText(), question.getScore(), dtos);
-                })
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<QuizSummaryDto> mapToSummaryDto(Set<Question> questions) {
-
-
-        return questions.stream()
-                .map(question -> {
-                    Quiz quiz = question.getQuiz();
-                    if (quiz == null) {
-                        return null; // Or throw IllegalArgumentException if strict non-null is intentional
-                    }
-                    return QuizSummaryDto.builder()
-                            .id(question.getQuestionId())
-                            .title(question.getText())
-                            .topicNames(getTopicsByName(quiz.getTopics()))
-                            .totalQuestions(questions.size())
-                            .build();
-                })
-                .collect(Collectors.toSet());
-    }
-
-    private List<String> getTopicsByName(Set<Topic> topics) {
-        if (topics == null || topics.isEmpty()) {
-            return Collections.emptyList();
+        if (question == null) {
+            return null;
         }
 
-        return topics.stream()
-                .map(Topic::getName)
-                .toList();
+        QuestionResponse response = new QuestionResponse();
+
+        response.setQuestionId(question.getQuestionId());
+        response.setText(question.getText());
+        response.setScore(question.getScore());
+
+        if (question.getAnswers() != null) {
+            response.setAnswers(
+                    question.getAnswers()
+                            .stream()
+                            .map(this::mapAnswer)
+                            .toList()
+            );
+        } else {
+            response.setAnswers(Collections.emptyList());
+        }
+
+        return response;
+    }
+
+    @Override
+    public Set<QuestionResponse> mapToDto(Set<Question> questions) {
+
+        if (questions == null || questions.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return questions.stream()
+                .map(this::toDto)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Question toQuestion(CreateQuestionRequest request) {
+
+        if (request == null) {
+            return null;
+        }
+
+        return Question.builder()
+                .text(request.getText())
+                .score(1)
+                .build();
+    }
+
+    @Override
+    public Set<Question> toQuestion(
+            Set<CreateQuestionRequest> questions
+    ) {
+
+        if (questions == null || questions.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return questions.stream()
+                .map(this::toQuestion)
+                .collect(Collectors.toSet());
+    }
+
+    private AnswerResponse mapAnswer(Answer answer) {
+
+        if (answer == null) {
+            return null;
+        }
+
+        AnswerResponse response = new AnswerResponse();
+
+        response.setAnswerId(answer.getAnswerId());
+        response.setAnswerText(answer.getAnswerText());
+
+        return response;
     }
 }

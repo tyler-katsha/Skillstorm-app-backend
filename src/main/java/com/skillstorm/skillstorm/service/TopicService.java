@@ -30,7 +30,21 @@ public class TopicService {
 
     @Cacheable(cacheNames = "topicNames",key="#name")
     public Topic getTopicByName(String name) {
-        return topicRepository.findByName(name);
+        return topicRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("Topic not found: " + name));
+    }
+
+    @CachePut(cacheNames = "topicNames", key = "#result.name")
+    public Topic findOrCreate(String name) {
+
+        return topicRepository.findByName(name)
+                .orElseGet(() -> {
+                    Topic topic = Topic.builder()
+                            .name(name)
+                            .build();
+
+                    return topicRepository.save(topic);
+                });
     }
 
     @Cacheable(cacheNames = "topic",key="'all'")

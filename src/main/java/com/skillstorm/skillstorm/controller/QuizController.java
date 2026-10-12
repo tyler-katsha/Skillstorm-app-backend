@@ -2,11 +2,14 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.CreateQuizRequest;
+import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +34,17 @@ public class QuizController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
-    public Quiz create(@RequestBody Quiz quiz) {
-        return quizService.create(quiz);
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<Quiz> create(@RequestBody CreateQuizRequest request, @AuthenticationPrincipal UserPrincipal principal) {
+        try{
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(quizService.create(request,principal));
+
+        } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")

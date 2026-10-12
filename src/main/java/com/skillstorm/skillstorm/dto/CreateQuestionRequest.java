@@ -1,0 +1,18 @@
+package com.skillstorm.skillstorm.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateQuestionRequest {
+    private String text;
+    private List<String> options;
+    private Integer correctOption;
+}

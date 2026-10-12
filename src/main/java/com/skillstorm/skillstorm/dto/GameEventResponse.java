@@ -17,7 +17,7 @@ public class GameEventResponse<T> {
     private GameEventType gameEventType;
     private T payload;
 
-    public GameEventResponse(GameEventType gameEventType) {
+    private GameEventResponse(GameEventType gameEventType) {
         this.gameEventType = gameEventType;
         this.payload = null;
     }

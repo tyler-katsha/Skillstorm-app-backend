@@ -10,8 +10,10 @@ import java.util.Collection;
 public class UserPrincipal extends User{
 
     private final int userId;
-    public UserPrincipal(int userId,String username, @Nullable String password, Collection<? extends GrantedAuthority> authorities) {
+    private final String email;
+    public UserPrincipal(int userId,String email,String username, @Nullable String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.userId = userId;
+        this.email = email;
     }
 }
