@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.BadgeDTO;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,14 +23,15 @@ public class BadgeService {
     private final BadgeRepository badgeRepository;
     private final UserRepository userRepository;
 
-    public Badge create(String title, String description, Integer userId) {
+    public Badge create(BadgeDTO dto, Integer userId) {
         User user = userId == null ? null : userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
-        Badge badge = new Badge();
-        badge.setName(title);
-        badge.setDescription(description);
-        badge.setUser(user);
+        Badge badge = Badge.builder()
+                .name(dto.name())
+                .description(dto.description())
+                .user(user)
+                .build();
 
         return badgeRepository.save(badge);
     }

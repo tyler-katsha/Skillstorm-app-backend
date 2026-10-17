@@ -2,11 +2,15 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.BadgeDTO;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +34,16 @@ public class BadgeController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
-    public Badge create(@RequestParam String title,  @RequestParam String description, @RequestParam Integer userId) {
-        return badgeService.create(title, description, userId);
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    public ResponseEntity<?> create(@RequestBody BadgeDTO dto, @AuthenticationPrincipal UserPrincipal principal) {
+        try{
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(badgeService.create(dto, principal.getUserId()));
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
@@ -49,16 +59,23 @@ public class BadgeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public Badge update(@PathVariable Integer id, @RequestBody Badge updated) {
         return badgeService.update(id, updated);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Integer id) {
-        badgeService.delete(id);
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        try{
+            badgeService.delete(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/cache")
