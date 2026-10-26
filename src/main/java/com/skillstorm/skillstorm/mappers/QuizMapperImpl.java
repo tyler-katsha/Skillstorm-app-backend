@@ -8,6 +8,7 @@ import com.skillstorm.skillstorm.model.Topic;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,18 +28,14 @@ public class QuizMapperImpl implements QuizMapper {
             return null;
         }
 
-        Set<String> topicNames = getTopicsByName(
-                quiz.getTopics()
-        );
+        List<String> topicNames = getTopicsByName(quiz.getTopics());
 
         return new QuizDTO(
+                quiz.getQuizId(),
                 quiz.getTitle(),
                 quiz.getDifficulty(),
                 topicNames,
-                quiz.getQuestions() != null
-                        ? questionMapper.mapToDto(quiz.getQuestions())
-                        : Collections.emptySet()
-        );
+                questionMapper.mapToDto(quiz.getQuestions()));
     }
 
     @Override
@@ -55,17 +52,15 @@ public class QuizMapperImpl implements QuizMapper {
     }
 
     @Override
-    public Set<QuizSummaryDto> mapToSummaryDto(
-            Set<Quiz> quizzes
-    ) {
+    public List<QuizSummaryDto> mapToSummaryDto(List<Quiz> quizzes) {
 
         if (quizzes == null || quizzes.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         return quizzes.stream()
                 .map(this::mapToSummaryDto)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     @Override
@@ -78,25 +73,19 @@ public class QuizMapperImpl implements QuizMapper {
         return QuizSummaryDto.builder()
                 .id(quiz.getQuizId())
                 .title(quiz.getTitle())
-                .topicNames(
-                        getTopicsByName(quiz.getTopics())
-                )
-                .totalQuestions(
-                        quiz.getQuestions() != null
-                                ? quiz.getQuestions().size()
-                                : 0
-                )
+                .topicNames(getTopicsByName(quiz.getTopics()))
+                .totalQuestions(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0)
                 .build();
     }
 
-    private Set<String> getTopicsByName(Set<Topic> topics) {
+    private List<String> getTopicsByName(List<Topic> topics) {
 
         if (topics == null || topics.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         return topics.stream()
                 .map(Topic::getName)
-                .collect(Collectors.toSet());
+                .toList();
     }
 }

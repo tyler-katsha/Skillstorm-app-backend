@@ -7,5 +7,5 @@ import com.skillstorm.skillstorm.model.Topic;
 import java.util.Optional;
 
 public interface TopicRepository extends JpaRepository<Topic, Integer> {
-    Optional<Topic> findByName(String name);
+    Optional<Topic> findByNameIgnoreCase(String name);
 }

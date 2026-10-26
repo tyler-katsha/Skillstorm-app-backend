@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AnswerResponse {
-
     private Integer answerId;
     private String answerText;
-    private boolean isCorrect;
+    private Boolean isCorrect;
 }

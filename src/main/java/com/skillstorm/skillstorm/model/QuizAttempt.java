@@ -42,7 +42,7 @@ public class QuizAttempt {
     @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<QuestionAttempt> questions = new HashSet<>();
+    private List<QuestionAttempt> questions = new ArrayList<>();
 
     // Helper method to keep bidirectional state in sync
     public void addQuestionAttempt(QuestionAttempt questionAttempt) {

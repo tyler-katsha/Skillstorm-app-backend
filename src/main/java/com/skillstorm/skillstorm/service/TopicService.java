@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,21 +31,14 @@ public class TopicService {
 
     @Cacheable(cacheNames = "topicNames",key="#name")
     public Topic getTopicByName(String name) {
-        return topicRepository.findByName(name)
+        return topicRepository.findByNameIgnoreCase(name)
                 .orElseThrow(() -> new RuntimeException("Topic not found: " + name));
     }
 
     @CachePut(cacheNames = "topicNames", key = "#result.name")
     public Topic findOrCreate(String name) {
-
-        return topicRepository.findByName(name)
-                .orElseGet(() -> {
-                    Topic topic = Topic.builder()
-                            .name(name)
-                            .build();
-
-                    return topicRepository.save(topic);
-                });
+        return topicRepository.findByNameIgnoreCase(name)
+                .orElseGet(() -> topicRepository.save(Topic.builder().name(name).build()));
     }
 
     @Cacheable(cacheNames = "topic",key="'all'")
@@ -69,4 +63,6 @@ public class TopicService {
     public void delete(int topicId) {
         topicRepository.deleteById(topicId);
     }
+
+
 }

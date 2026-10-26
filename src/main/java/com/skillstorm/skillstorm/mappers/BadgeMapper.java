@@ -9,5 +9,5 @@ import java.util.Set;
 
 @Mapper(componentModel="spring")
 public interface BadgeMapper {
-    Set<BadgeDTO> mapToDto(Set<Badge> badges);
+    List<BadgeDTO> mapToDto(List<Badge> badges);
 }

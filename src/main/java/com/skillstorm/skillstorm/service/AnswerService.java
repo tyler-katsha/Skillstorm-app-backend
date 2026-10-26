@@ -37,11 +37,8 @@ public class AnswerService {
         return answerRepository.findByQuestionQuestionId(questionId);
     }
 
-    @CachePut(cacheNames = "answer",key = "#answer.answerId")
     @Caching(evict = {
-            @CacheEvict(cacheNames = "answer", key = "#answer.answerId"),
             @CacheEvict(cacheNames = "answer", key = "'all'"),
-            @CacheEvict(cacheNames = "answer", key = "#answer.question.questionId")
     })
     public Answer updateAnswer(Answer answer) {
         return answerRepository.save(answer);

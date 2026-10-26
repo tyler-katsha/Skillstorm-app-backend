@@ -8,6 +8,7 @@ import com.skillstorm.skillstorm.model.Question;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,15 +43,15 @@ public class QuestionMapperImpl implements QuestionMapper {
     }
 
     @Override
-    public Set<QuestionResponse> mapToDto(Set<Question> questions) {
+    public List<QuestionResponse> mapToDto(List<Question> questions) {
 
         if (questions == null || questions.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         return questions.stream()
                 .map(this::toDto)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     @Override
@@ -67,17 +68,15 @@ public class QuestionMapperImpl implements QuestionMapper {
     }
 
     @Override
-    public Set<Question> toQuestion(
-            Set<CreateQuestionRequest> questions
-    ) {
+    public List<Question> toQuestion(List<CreateQuestionRequest> questions) {
 
         if (questions == null || questions.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         return questions.stream()
                 .map(this::toQuestion)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     private AnswerResponse mapAnswer(Answer answer) {
@@ -90,6 +89,7 @@ public class QuestionMapperImpl implements QuestionMapper {
 
         response.setAnswerId(answer.getAnswerId());
         response.setAnswerText(answer.getAnswerText());
+        response.setIsCorrect(answer.isCorrect());
 
         return response;
     }

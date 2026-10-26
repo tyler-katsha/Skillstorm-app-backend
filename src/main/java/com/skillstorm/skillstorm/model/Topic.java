@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,5 +35,5 @@ public class Topic {
 
     @ManyToMany(mappedBy = "topics", fetch = FetchType.EAGER)
     @Builder.Default
-    private Set<Quiz> quizzes = new HashSet<>();
+    private List<Quiz> quizzes = new ArrayList<>();
 }

@@ -1,25 +1,22 @@
 package com.skillstorm.skillstorm.mappers;
 
+import com.skillstorm.skillstorm.dto.QuizAttemptResponse;
 import com.skillstorm.skillstorm.dto.QuizSummaryDto;
-import com.skillstorm.skillstorm.dto.UserResponse;
 import com.skillstorm.skillstorm.dto.UserTrackerRequest;
 import com.skillstorm.skillstorm.dto.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.model.Quiz;
-import com.skillstorm.skillstorm.model.User;
-import com.skillstorm.skillstorm.model.UserTracker;
+import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class UserTrackerMapperImpl implements UserTrackerMapper{
+public class UserTrackerMapperImpl implements UserTrackerMapper {
 
     @Autowired
     private UserRepository userRepository;
@@ -29,31 +26,46 @@ public class UserTrackerMapperImpl implements UserTrackerMapper{
 
     @Override
     public UserTrackerResponse mapToDto(UserTracker tracker) {
-        if(tracker == null) throw new IllegalArgumentException("No Tracker found");
+        if (tracker == null) {
+            throw new IllegalArgumentException("No Tracker found");
+        }
 
-        int xpForNext = (tracker.getCurrentLevel() * 50) - tracker.getTotalXp();
+        UserOverallStats stats = tracker.getOverallStats() != null
+                ? tracker.getOverallStats()
+                : new UserOverallStats();
+
+        int currentLvl = stats.getCurrentLevel() != null ? stats.getCurrentLevel() : 1;
+        int totalXp = stats.getTotalXp() != null ? stats.getTotalXp() : 0;
+        int xpForNext = (currentLvl * 1000) - totalXp;
+
+        List<QuizAttemptResponse> attempts = tracker.getAttemptRecords() != null
+                ? tracker.getAttemptRecords().stream()
+                  .map(this::mapAttemptToDto)
+                  .toList()
+                : List.of();
 
         return UserTrackerResponse.builder()
                 .id(tracker.getId())
                 .userId(tracker.getUser() != null ? tracker.getUser().getUserId() : null)
                 .username(tracker.getUser() != null ? tracker.getUser().getUsername() : null)
-                .currentLevel(tracker.getCurrentLevel())
-                .totalXp(tracker.getTotalXp())
+                .currentLevel(currentLvl)
+                .totalXp(totalXp)
                 .xpToNewLevel(Math.max(0, xpForNext))
-                .streak(tracker.getStreak())
-                .longestStreak(tracker.getLongestStreak())
-                .lastActiveDate(tracker.getLastActiveDate())
-                .totalTimeSpentSeconds(tracker.getTotalTimeSpentSeconds())
-                .quizzesTaken(tracker.getQuizzesTaken())
-                .quizzesWon(tracker.getQuizzesWon())
-                .perfectQuizzes(tracker.getPerfectQuizzes())
-                .winRate(tracker.getWinRate())
-                .totalQuestionsAnswered(tracker.getTotalQuestionsAnswered())
-                .totalCorrectAnswers(tracker.getTotalCorrectAnswers())
-                .accuraryRate(tracker.getAccuracyRate())
-                .completedQuizzes(mapQuizSet(tracker.getCompletedQuizzes()))
-                .uncompletedQuizzes(mapQuizSet(tracker.getUncompletedQuizzes()))
-                .bookmarkedQuizzes(mapQuizSet(tracker.getBookmarkedQuizzes()))
+                .streak(stats.getCurrentStreak())
+                .longestStreak(stats.getLongestStreak())
+                .lastActiveDate(stats.getLastActivityDate())
+                .totalTimeSpentSeconds(stats.getTotalTimeSpentSeconds())
+                .quizzesTaken(stats.getTotalQuizzesCompleted())
+                .quizzesWon(stats.getQuizzesWon())
+                .perfectQuizzes(stats.getPerfectQuizzes())
+                .winRate(stats.getWinRate())
+                .totalQuestionsAnswered(stats.getTotalQuestionsAnswered())
+                .totalCorrectAnswers(stats.getTotalCorrectAnswers())
+                .accuracyRate(stats.getAccuracyRate())
+                .completedQuizzes(tracker.getCompletedQuizzes())
+                .uncompletedQuizzes(tracker.getUncompletedQuizzes())
+                .bookmarkedQuizzes(tracker.getBookmarkedQuizzes())
+                .attemptRecords(attempts)
                 .build();
     }
 
@@ -66,45 +78,80 @@ public class UserTrackerMapperImpl implements UserTrackerMapper{
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with id: " + request.getUserId()));
 
-        Set<Quiz> completed = request.getCompletedQuizId() != null
-                ? new HashSet<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId())))
-                : new HashSet<>();
+        List<Quiz> completed = request.getCompletedQuizId() != null
+                ? new ArrayList<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId())))
+                : new ArrayList<>();
 
-        Set<Quiz> uncompleted = (request.getUncompletedQuizIds() != null && !request.getUncompletedQuizIds().isEmpty())
-                ? new HashSet<>(quizRepository.findAllById(request.getUncompletedQuizIds()))
-                : new HashSet<>();
+        List<Quiz> uncompleted = (request.getUncompletedQuizIds() != null && !request.getUncompletedQuizIds().isEmpty())
+                ? new ArrayList<>(quizRepository.findAllById(request.getUncompletedQuizIds()))
+                : new ArrayList<>();
 
-        Set<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty())
-                ? new HashSet<>(quizRepository.findAllById(request.getBookmarkedQuizIds()))
-                : new HashSet<>();
+        List<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty())
+                ? new ArrayList<>(quizRepository.findAllById(request.getBookmarkedQuizIds()))
+                : new ArrayList<>();
 
-        return UserTracker.builder()
-                .user(user)
-                .quizzesTaken(1)
+        int gainedXp = request.getGainedXp() != null ? request.getGainedXp() : 0;
+        int calculatedLevel = request.getCurrentLevel() != null
+                ? request.getCurrentLevel()
+                : 1 + (gainedXp / 1000);
+
+        UserOverallStats stats = UserOverallStats.builder()
+                .totalQuizzesCompleted(1)
                 .quizzesWon(Boolean.TRUE.equals(request.getIsQuizWon()) ? 1 : 0)
                 .perfectQuizzes(Boolean.TRUE.equals(request.getIsPerfectQuiz()) ? 1 : 0)
                 .totalQuestionsAnswered(request.getQuestionsAnswered() != null ? request.getQuestionsAnswered() : 0)
                 .totalCorrectAnswers(request.getCorrectAnswers() != null ? request.getCorrectAnswers() : 0)
                 .totalTimeSpentSeconds(request.getTimeSpentSeconds() != null ? request.getTimeSpentSeconds() : 0L)
-                .totalXp(request.getGainedXp() != null ? request.getGainedXp() : 0)
-                .currentLevel(request.getCurrentLevel() != null ? request.getCurrentLevel() : 1)
-                .streak(1)
+                .totalXp(gainedXp)
+                .currentLevel(calculatedLevel)
+                .currentStreak(1)
                 .longestStreak(1)
-                .lastActiveDate(LocalDate.now())
+                .lastActivityDate(LocalDate.now())
+                .build();
+
+        UserTracker tracker = UserTracker.builder()
+                .user(user)
+                .overallStats(stats)
                 .completedQuizzes(completed)
                 .uncompletedQuizzes(uncompleted)
                 .bookmarkedQuizzes(bookmarked)
+                .attemptRecords(new ArrayList<>())
                 .build();
+
+        if (request.getCompletedQuizId() != null && !completed.isEmpty()) {
+            Quiz completedQuiz = completed.iterator().next();
+            QuizAttemptRecord initialAttempt = QuizAttemptRecord.builder()
+                    .userTracker(tracker)
+                    .quiz(completedQuiz)
+                    .attemptNumber(1)
+                    .questionsAnswered(request.getQuestionsAnswered() != null ? request.getQuestionsAnswered() : 0)
+                    .correctAnswers(request.getCorrectAnswers() != null ? request.getCorrectAnswers() : 0)
+                    .timeSpentSeconds(request.getTimeSpentSeconds() != null ? request.getTimeSpentSeconds() : 0L)
+                    .gainedXp(gainedXp)
+                    .isQuizWon(request.getIsQuizWon())
+                    .isPerfectQuiz(request.getIsPerfectQuiz())
+                    .build();
+
+            tracker.addAttemptRecord(initialAttempt);
+        }
+
+        return tracker;
     }
 
-    private Set<QuizSummaryDto> mapQuizSet(Set<Quiz> quizzes){
-        if(quizzes == null) return Set.of();
+    public QuizAttemptResponse mapAttemptToDto(QuizAttemptRecord record) {
+        if (record == null) return null;
 
-        return quizzes.stream()
-                .map(q -> QuizSummaryDto.builder()
-                        .id(q.getQuizId())
-                        .title(q.getTitle())
-                        .build())
-                .collect(Collectors.toSet());
+        return QuizAttemptResponse.builder()
+                .attemptId(record.getAttemptId())
+                .quizId(record.getQuiz() != null ? record.getQuiz().getQuizId() : null)
+                .attemptNumber(record.getAttemptNumber())
+                .questionsAnswered(record.getQuestionsAnswered())
+                .correctAnswers(record.getCorrectAnswers())
+                .timeSpentSeconds(record.getTimeSpentSeconds())
+                .gainedXp(record.getGainedXp())
+                .isQuizWon(record.getIsQuizWon())
+                .isPerfectQuiz(record.getIsPerfectQuiz())
+                .completedAt(record.getCompletedAt())
+                .build();
     }
 }

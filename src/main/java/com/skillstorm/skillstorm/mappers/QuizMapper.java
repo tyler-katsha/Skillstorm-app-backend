@@ -5,7 +5,7 @@ import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.dto.QuizSummaryDto;
 import com.skillstorm.skillstorm.model.Quiz;
 
-import java.util.Set;
+import java.util.List;
 
 public interface QuizMapper {
 
@@ -13,7 +13,7 @@ public interface QuizMapper {
 
     QuizSummaryDto mapToSummaryDto(Quiz quiz);
 
-    Set<QuizSummaryDto> mapToSummaryDto(Set<Quiz> quizzes);
+    List<QuizSummaryDto> mapToSummaryDto(List<Quiz> quizzes);
 
     Quiz toQuiz(CreateQuizRequest request);
 }

@@ -1,11 +1,13 @@
 package com.skillstorm.skillstorm.dto;
 
+import com.skillstorm.skillstorm.model.Quiz;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,27 +20,30 @@ public class UserTrackerResponse {
     private Integer userId;
     private String username;
 
-    private Integer currentLevel;
+    // Flattened overall stats
     private Integer totalXp;
     private Integer xpToNewLevel;
-
+    private Integer currentLevel;
     private Integer streak;
     private Integer longestStreak;
-    private LocalDate lastActiveDate;
-    private Long totalTimeSpentSeconds;
-
     private Integer quizzesTaken;
     private Integer quizzesWon;
-    private Integer quizzesLost;
-    private Integer drawn;
     private Integer perfectQuizzes;
-    private Double winRate;
-
     private Integer totalQuestionsAnswered;
     private Integer totalCorrectAnswers;
-    private Double accuraryRate;
+    private Long totalTimeSpentSeconds;
+    private LocalDate lastActiveDate;
+    private Double accuracyRate;
+    private Double winRate;
 
-    private Set<QuizSummaryDto> completedQuizzes;
-    private Set<QuizSummaryDto> uncompletedQuizzes;
-    private Set<QuizSummaryDto> bookmarkedQuizzes;
+    // Associated Quiz IDs
+    private Set<Integer> uncompletedQuizIds;
+    private Set<Integer> completedQuizIds;
+    private Set<Integer> bookmarkedQuizIds;
+
+    // Attempt history overview
+    private List<QuizAttemptResponse> attemptRecords;
+    private List<Quiz> completedQuizzes;
+    private List<Quiz> uncompletedQuizzes;
+    private List<Quiz> bookmarkedQuizzes;
 }

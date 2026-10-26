@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -20,8 +21,8 @@ public class UserResponse {
     private String email;
     private Set<Role> roles;
     private int xp;
-    private Set<Attempt> attempts;
-    private Set<Badge> badges;
+    private List<Attempt> attempts;
+    private List<Badge> badges;
     private String createdAt;
 
 }

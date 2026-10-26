@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,6 +29,6 @@ public class UserTrackerRequest {
     private Boolean isPerfectQuiz;
 
     private Integer completedQuizId;
-    private Set<Integer> uncompletedQuizIds;
-    private Set<Integer> bookmarkedQuizIds;
+    private List<Integer> uncompletedQuizIds;
+    private List<Integer> bookmarkedQuizIds;
 }

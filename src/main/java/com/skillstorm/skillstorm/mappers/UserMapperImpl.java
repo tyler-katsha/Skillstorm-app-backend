@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
+
 
 @Component
 public class UserMapperImpl implements UserMapper{
@@ -29,9 +31,9 @@ public class UserMapperImpl implements UserMapper{
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .xp(0)
-                .attempts(Set.of())
+                .attempts(List.of())
                 .roles(Set.of(Role.USER))
-                .badges(Set.of())
+                .badges(List.of())
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -42,7 +44,7 @@ public class UserMapperImpl implements UserMapper{
             throw new IllegalArgumentException("Unable to process User Object");
         }
 
-        Set<BadgeDTO> badges = badgeMapper.mapToDto(user.getBadges());
+        List<BadgeDTO> badges = badgeMapper.mapToDto(user.getBadges());
 
         return new UserDTO(user.getUsername(),user.getXp(),badges);
     }

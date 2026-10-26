@@ -57,10 +57,7 @@ public class AttemptService {
         return attemptRepository.findByQuizQuizId(quizId);
     }
 
-    @CachePut(cacheNames = "attempt",key = "#attempt.attemptId")
     @Caching(evict = {
-            @CacheEvict(cacheNames = "attempt",key="#attempt.attemptId"),
-            @CacheEvict(cacheNames = "attempt",key="#attempt.quiz.quizId"),
             @CacheEvict(cacheNames = "attempt",key = "'all'")
     })
     public Attempt update(Attempt attempt) {

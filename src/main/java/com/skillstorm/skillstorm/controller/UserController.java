@@ -2,7 +2,10 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
+import com.skillstorm.skillstorm.dto.UncompletedDto;
 import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.UserTrackerResponse;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +74,30 @@ public class UserController {
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("user");
         return ResponseEntity.ok("Cache was checked");
+    }
+
+    @GetMapping("/history")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<UserTrackerResponse> history(@AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            return ResponseEntity.ok(userService.history(principal.getUserId()));
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/uncompleted/{quizId}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId,@RequestBody UncompletedDto dto,@AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            userService.saveUncompletedQuiz(principal.getUserId(),quizId,dto);
+            return ResponseEntity.ok().build();
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

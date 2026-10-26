@@ -4,13 +4,12 @@ import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.Topic;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Component
 public class TopicMapperImpl implements TopicMapper{
     @Override
-    public Set<Topic> toTopic(Set<String> topicNames, Quiz quiz) {
+    public List<Topic> toTopic(List<String> topicNames, Quiz quiz) {
         if(topicNames == null) return null;
 
         return topicNames.stream()
@@ -18,9 +17,9 @@ public class TopicMapperImpl implements TopicMapper{
 
                     return Topic.builder()
                             .name(s)
-                            .quizzes(Set.of(quiz))
+                            .quizzes(List.of(quiz))
                             .build();
                 })
-                .collect(Collectors.toSet());
+                .toList();
     }
 }

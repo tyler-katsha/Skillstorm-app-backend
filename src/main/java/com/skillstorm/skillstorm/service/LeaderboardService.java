@@ -56,9 +56,7 @@ public class LeaderboardService {
         return leaderboardRepository.findAll();
     }
 
-    @CachePut(cacheNames = "leaderboard",key="#id")
     @Caching(evict = {
-            @CacheEvict(cacheNames = "leaderboard",key = "#id"),
             @CacheEvict(cacheNames = "leaderboard",key="'all'")
     })
     public Leaderboard update(Integer id, Leaderboard updated) {

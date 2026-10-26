@@ -2,7 +2,9 @@ package com.skillstorm.skillstorm.controller;
 
 import java.util.List;
 
-import com.skillstorm.skillstorm.dto.CreateQuizRequest;
+import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.model.Question;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.skillstorm.skillstorm.dto.QuizDTO;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.service.QuizService;
 
@@ -60,15 +61,29 @@ public class QuizController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public Quiz update(@PathVariable Integer id, @RequestBody Quiz updated) {
-        return quizService.update(updated);
+    public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody UpdateQuizRequest updatedQuiz, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        try {
+
+            quizService.update(id,updatedQuiz,userPrincipal.getEmail());
+            return ResponseEntity.ok().build();
+
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch(Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public void delete(@PathVariable Integer id) {
-        quizService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        try{
+            quizService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/cache")
@@ -76,5 +91,17 @@ public class QuizController {
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("quiz");
         return ResponseEntity.ok("Cache was checked");
+    }
+
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<SubmissionResultDto> submit(@PathVariable int id, @RequestBody SubmissionPayload payload, @AuthenticationPrincipal UserPrincipal principal) {
+        try {
+
+            return ResponseEntity.ok(quizService.submit(id,payload,principal.getUserId()));
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch(Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

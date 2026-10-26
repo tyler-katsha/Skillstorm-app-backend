@@ -37,6 +37,7 @@ public class UserService {
     private final JwtTokenProvider tokenProvider;
     private final BloomFilter<String> usernameFilter;
     private final BloomFilter<String> emailFilter;
+    private final UserTrackerService userTrackerService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -154,5 +155,13 @@ public class UserService {
     private boolean isEmailTaken(String email){
         if(!emailFilter.mightContain(email)) return false;
         return userRepository.existsByEmail(email);
+    }
+
+    public UserTrackerResponse history(int userId) {
+        return userTrackerService.history(userId);
+    }
+
+    public void saveUncompletedQuiz(int userId, int quizId, UncompletedDto dto) {
+        userTrackerService.saveUncompletedQuiz(userId,quizId,dto);
     }
 }

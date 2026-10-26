@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class AnswerMapperImpl implements AnswerMapper {
@@ -29,7 +27,7 @@ public class AnswerMapperImpl implements AnswerMapper {
     }
 
     @Override
-    public List<AnswerResponse> mapToDto(Set<Answer> answers) {
+    public List<AnswerResponse> mapToDto(List<Answer> answers) {
 
         if (answers == null || answers.isEmpty()) {
             return Collections.emptyList();
@@ -41,10 +39,10 @@ public class AnswerMapperImpl implements AnswerMapper {
     }
 
     @Override
-    public Set<AnswerDTO> mapToAnswerDTO(Set<Answer> answers) {
+    public List<AnswerDTO> mapToAnswerDTO(List<Answer> answers) {
 
         if (answers == null || answers.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         return answers.stream()
@@ -52,6 +50,6 @@ public class AnswerMapperImpl implements AnswerMapper {
                         answer.getAnswerText(),
                         answer.isCorrect()
                 ))
-                .collect(Collectors.toSet());
+                .toList();
     }
 }

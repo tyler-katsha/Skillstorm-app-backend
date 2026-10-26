@@ -4,10 +4,9 @@ import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.Topic;
 import org.mapstruct.Mapper;
 
-import java.util.Set;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
-
 public interface TopicMapper {
-    Set<Topic> toTopic(Set<String> topicNames, Quiz quiz);
+    List<Topic> toTopic(List<String> topicNames, Quiz quiz);
 }

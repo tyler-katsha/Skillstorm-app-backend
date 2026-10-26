@@ -1,10 +1,7 @@
 package com.skillstorm.skillstorm.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,11 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "user_tracker")
+@Table(name = "user_trackers")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"user", "attemptRecords", "uncompletedQuizzes", "completedQuizzes", "bookmarkedQuizzes"})
+@ToString(exclude = {"user", "attemptRecords", "uncompletedQuizzes", "completedQuizzes", "bookmarkedQuizzes"})
 public class UserTracker {
 
     @Id
@@ -28,52 +27,14 @@ public class UserTracker {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    // --- Quiz Performance ---
+    @Embedded
     @Builder.Default
-    @Column(nullable = false)
-    private Integer quizzesTaken = 0;
+    private UserOverallStats overallStats = new UserOverallStats();
 
+    @OneToMany(mappedBy = "userTracker", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    @Column(nullable = false)
-    private Integer quizzesWon = 0;
+    private List<QuizAttemptRecord> attemptRecords = new ArrayList<>();
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer perfectQuizzes = 0;
-
-    // --- Question-Level Metrics ---
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer totalQuestionsAnswered = 0;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer totalCorrectAnswers = 0;
-
-    // --- Streaks & Activity ---
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer streak = 0;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer longestStreak = 0;
-
-    private LocalDate lastActiveDate;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Long totalTimeSpentSeconds = 0L;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer totalXp = 0;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer currentLevel = 1;
-
-    // --- Quiz Relationships (Using Sets to avoid duplicates) ---
     @ManyToMany
     @JoinTable(
             name = "user_tracker_uncompleted_quizzes",
@@ -81,7 +42,7 @@ public class UserTracker {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @Builder.Default
-    private Set<Quiz> uncompletedQuizzes = new HashSet<>();
+    private List<Quiz> uncompletedQuizzes = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -90,7 +51,7 @@ public class UserTracker {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @Builder.Default
-    private Set<Quiz> completedQuizzes = new HashSet<>();
+    private List<Quiz> completedQuizzes = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -99,18 +60,16 @@ public class UserTracker {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @Builder.Default
-    private Set<Quiz> bookmarkedQuizzes = new HashSet<>();
+    private List<Quiz> bookmarkedQuizzes = new ArrayList<>();
 
-    // --- Computed Helper Methods ---
-    @Transient
-    public Double getAccuracyRate() {
-        if (totalQuestionsAnswered == 0) return 0.0;
-        return ((double) totalCorrectAnswers / totalQuestionsAnswered) * 100.0;
+    public void addAttemptRecord(QuizAttemptRecord record) {
+        attemptRecords.add(record);
+        record.setUserTracker(this);
     }
 
-    @Transient
-    public Double getWinRate() {
-        if (quizzesTaken == 0) return 0.0;
-        return ((double) quizzesWon / quizzesTaken) * 100.0;
+    public int getNextAttemptNumberForQuiz(Integer quizId) {
+        return (int) attemptRecords.stream()
+                .filter(a -> a.getQuiz() != null && a.getQuiz().getQuizId().equals(quizId))
+                .count() + 1;
     }
 }

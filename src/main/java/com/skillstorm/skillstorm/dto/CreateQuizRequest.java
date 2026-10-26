@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,6 +16,6 @@ import java.util.Set;
 public class CreateQuizRequest {
     private String title;
     private String difficulty;
-    private Set<String> topicNames;
-    private Set<CreateQuestionRequest> questions;
+    private List<String> topicNames;
+    private List<CreateQuestionRequest> questions;
 }

@@ -16,6 +16,6 @@ public class QuizSummaryDto {
 
     private Integer id;
     private String title;
-    private Set<String> topicNames;
+    private List<String> topicNames;
     private Integer totalQuestions;
 }

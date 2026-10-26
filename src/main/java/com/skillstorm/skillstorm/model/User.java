@@ -2,10 +2,7 @@ package com.skillstorm.skillstorm.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,11 +44,11 @@ public class User implements UserDetails, Serializable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
-    private Set<Badge> badges = new HashSet<>();
+    private List<Badge> badges = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
-    private Set<Attempt> attempts = new HashSet<>();
+    private List<Attempt> attempts = new ArrayList<>();
 
     @Column(name = "roles", nullable = false)
     @Builder.Default

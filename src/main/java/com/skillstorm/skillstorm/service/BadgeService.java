@@ -45,9 +45,8 @@ public class BadgeService {
     public List<Badge> getAll() {
         return badgeRepository.findAll();
     }
-    @CachePut(cacheNames = "badge",key="#id")
+
     @Caching(evict = {
-            @CacheEvict(cacheNames = "badge",key="#id"),
             @CacheEvict(cacheNames = "badge",key="'all'")
     })
     public Badge update(Integer id, Badge updated) {
