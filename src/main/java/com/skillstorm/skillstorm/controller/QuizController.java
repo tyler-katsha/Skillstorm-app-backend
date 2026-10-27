@@ -97,10 +97,12 @@ public class QuizController {
     public ResponseEntity<SubmissionResultDto> submit(@PathVariable int id, @RequestBody SubmissionPayload payload, @AuthenticationPrincipal UserPrincipal principal) {
         try {
 
-            return ResponseEntity.ok(quizService.submit(id,payload,principal.getUserId()));
+            var res = quizService.submit(id,payload,principal.getUserId());
+            return ResponseEntity.ok(res);
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch(Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

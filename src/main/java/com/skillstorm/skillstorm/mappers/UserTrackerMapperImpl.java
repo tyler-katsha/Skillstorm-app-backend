@@ -1,28 +1,26 @@
 package com.skillstorm.skillstorm.mappers;
 
 import com.skillstorm.skillstorm.dto.QuizAttemptResponse;
-import com.skillstorm.skillstorm.dto.QuizSummaryDto;
 import com.skillstorm.skillstorm.dto.UserTrackerRequest;
 import com.skillstorm.skillstorm.dto.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserTrackerMapperImpl implements UserTrackerMapper {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private QuizRepository quizRepository;
+    private final UserRepository userRepository;
+    private final QuizRepository quizRepository;
 
     @Override
     public UserTrackerResponse mapToDto(UserTracker tracker) {
@@ -51,20 +49,20 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .currentLevel(currentLvl)
                 .totalXp(totalXp)
                 .xpToNewLevel(Math.max(0, xpForNext))
-                .streak(stats.getCurrentStreak())
-                .longestStreak(stats.getLongestStreak())
+                .streak(stats.getCurrentStreak() != null ? stats.getCurrentStreak() : 0)
+                .longestStreak(stats.getLongestStreak() != null ? stats.getLongestStreak() : 0)
                 .lastActiveDate(stats.getLastActivityDate())
-                .totalTimeSpentSeconds(stats.getTotalTimeSpentSeconds())
-                .quizzesTaken(stats.getTotalQuizzesCompleted())
-                .quizzesWon(stats.getQuizzesWon())
-                .perfectQuizzes(stats.getPerfectQuizzes())
+                .totalTimeSpentSeconds(stats.getTotalTimeSpentSeconds() != null ? stats.getTotalTimeSpentSeconds() : 0L)
+                .quizzesTaken(stats.getTotalQuizzesCompleted() != null ? stats.getTotalQuizzesCompleted() : 0)
+                .quizzesWon(stats.getQuizzesWon() != null ? stats.getQuizzesWon() : 0)
+                .perfectQuizzes(stats.getPerfectQuizzes() != null ? stats.getPerfectQuizzes() : 0)
                 .winRate(stats.getWinRate())
-                .totalQuestionsAnswered(stats.getTotalQuestionsAnswered())
-                .totalCorrectAnswers(stats.getTotalCorrectAnswers())
+                .totalQuestionsAnswered(stats.getTotalQuestionsAnswered() != null ? stats.getTotalQuestionsAnswered() : 0)
+                .totalCorrectAnswers(stats.getTotalCorrectAnswers() != null ? stats.getTotalCorrectAnswers() : 0)
                 .accuracyRate(stats.getAccuracyRate())
-                .completedQuizzes(tracker.getCompletedQuizzes())
-                .uncompletedQuizzes(tracker.getUncompletedQuizzes())
-                .bookmarkedQuizzes(tracker.getBookmarkedQuizzes())
+                .completedQuizzes(tracker.getCompletedQuizzes() != null ? new HashSet<>(tracker.getCompletedQuizzes()) : new HashSet<>())
+                .uncompletedQuizzes(tracker.getUncompletedQuizzes() != null ? new HashSet<>(tracker.getUncompletedQuizzes()) : new HashSet<>())
+                .bookmarkedQuizzes(tracker.getBookmarkedQuizzes() != null ? new HashSet<>(tracker.getBookmarkedQuizzes()) : new HashSet<>())
                 .attemptRecords(attempts)
                 .build();
     }
@@ -78,17 +76,13 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with id: " + request.getUserId()));
 
-        List<Quiz> completed = request.getCompletedQuizId() != null
-                ? new ArrayList<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId())))
-                : new ArrayList<>();
+        Set<Quiz> completed = request.getCompletedQuizId() != null
+                ? new HashSet<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId())))
+                : new HashSet<>();
 
-        List<Quiz> uncompleted = (request.getUncompletedQuizIds() != null && !request.getUncompletedQuizIds().isEmpty())
-                ? new ArrayList<>(quizRepository.findAllById(request.getUncompletedQuizIds()))
-                : new ArrayList<>();
-
-        List<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty())
-                ? new ArrayList<>(quizRepository.findAllById(request.getBookmarkedQuizIds()))
-                : new ArrayList<>();
+        Set<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty())
+                ? new HashSet<>(quizRepository.findAllById(request.getBookmarkedQuizIds()))
+                : new HashSet<>();
 
         int gainedXp = request.getGainedXp() != null ? request.getGainedXp() : 0;
         int calculatedLevel = request.getCurrentLevel() != null
@@ -113,10 +107,27 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .user(user)
                 .overallStats(stats)
                 .completedQuizzes(completed)
-                .uncompletedQuizzes(uncompleted)
+                .uncompletedQuizzes(new HashSet<>())
                 .bookmarkedQuizzes(bookmarked)
                 .attemptRecords(new ArrayList<>())
                 .build();
+
+        // Map each Quiz ID into an UncompletedQuizProgress entity linked to this tracker
+        if (request.getUncompletedQuizIds() != null && !request.getUncompletedQuizIds().isEmpty()) {
+            Set<UncompletedQuizProgress> uncompleted = quizRepository.findAllById(request.getUncompletedQuizIds())
+                    .stream()
+                    .map(quiz -> UncompletedQuizProgress.builder()
+                            .userTracker(tracker)
+                            .quiz(quiz)
+                            .currentQuestion(0)
+                            .totalQuestions(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0)
+                            .percentage(0)
+                            .lastSavedAt(Instant.now())
+                            .build())
+                    .collect(Collectors.toSet());
+
+            tracker.setUncompletedQuizzes(uncompleted);
+        }
 
         if (request.getCompletedQuizId() != null && !completed.isEmpty()) {
             Quiz completedQuiz = completed.iterator().next();
@@ -130,6 +141,7 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                     .gainedXp(gainedXp)
                     .isQuizWon(request.getIsQuizWon())
                     .isPerfectQuiz(request.getIsPerfectQuiz())
+                    .completedAt(Instant.now())
                     .build();
 
             tracker.addAttemptRecord(initialAttempt);

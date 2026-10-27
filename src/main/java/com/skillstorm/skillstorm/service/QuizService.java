@@ -166,6 +166,7 @@ public class QuizService {
 
     @Transactional
     public SubmissionResultDto submit(int id, SubmissionPayload payload, int userId) {
+        System.out.println("id: " + id + "payload: " + payload + "userID: " + userId);
         return userTrackerService.submit(id,payload,userId);
     }
 

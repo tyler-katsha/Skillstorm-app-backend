@@ -12,8 +12,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class SubmissionPayload {
-    private int quizId;
-    private int userId;
-    private long timeSpentSeconds;
+    private Integer quizId;
+    private Integer userId;
+    private Long timeSpentSeconds;
     private List<UserAnswerSubmission> answers;
 }

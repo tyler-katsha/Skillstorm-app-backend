@@ -1,83 +1,53 @@
 package com.skillstorm.skillstorm.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.skillstorm.skillstorm.dto.LeaderboardDto;
-import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.mappers.LeaderboardMapper;
+import com.skillstorm.skillstorm.dto.LeaderboardEntryDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
-import com.skillstorm.skillstorm.model.Leaderboard;
 import com.skillstorm.skillstorm.model.User;
-import com.skillstorm.skillstorm.repository.LeaderboardRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class LeaderboardService {
 
-    private final LeaderboardRepository leaderboardRepository;
     private final UserRepository userRepository;
-    private final LeaderboardMapper leaderboardMapper;
+    @Cacheable(value = "top10Leaderboard", key = "'top10'")
+    @Transactional(readOnly = true)
+    public List<LeaderboardEntryDto> getTop10Leaderboard() {
+        log.info("Cache miss! Querying database for top 10 users by XP...");
 
-    /* We don't create this method more than once for the entire lifecycle of the application.
-     We will only update the existing 10 unless we want to keep track and update the entire
-     ranking system and keep track of the ranking's for all user's */
-    public Leaderboard create(int rank, int totalScore, Integer userId) {
+        List<User> topUsers = userRepository.findTop10ByOrderByXpDesc();
+        List<LeaderboardEntryDto> entries = new ArrayList<>();
 
-        User user = userId == null ? null : userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-
-        Leaderboard entry = new Leaderboard();
-        entry.setRank(rank);
-        entry.setTotalScore(totalScore);
-        entry.setUser(user);
-
-        return leaderboardRepository.save(entry);
-    }
-
-    @Cacheable(cacheNames = "leaderboard",key="#id")
-    public Leaderboard getById(Integer id) {
-        return leaderboardRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Leaderboard entry not found: " + id));
-    }
-
-    @Cacheable(cacheNames = "leaderboard",key="'all'")
-    public List<LeaderboardDto> getAll() {
-        return leaderboardRepository.findAll().stream().map(leaderboardMapper::mapToDto).toList();
-    }
-
-    public List<Leaderboard> findAll() {
-        return leaderboardRepository.findAll();
-    }
-
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "leaderboard",key="'all'")
-    })
-    public Leaderboard update(Integer id, Leaderboard updated) {
-        Leaderboard existing = getById(id);
-
-        existing.setRank(updated.getRank());
-        existing.setTotalScore(updated.getTotalScore());
-        existing.setUser(updated.getUser());
-
-        return leaderboardRepository.save(existing);
-    }
-
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "leaderboard",key = "#id"),
-            @CacheEvict(cacheNames = "leaderboard",key="'all'")
-    })
-    public void delete(Integer id) {
-        if (!leaderboardRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Leaderboard entry not found: " + id);
+        for (int i = 0; i < topUsers.size(); i++) {
+            User user = topUsers.get(i);
+            entries.add(LeaderboardEntryDto.builder()
+                    .rank(i + 1)
+                    .userId(user.getUserId())
+                    .username(user.getUsername())
+                    .xp(user.getXp() != null ? user.getXp() : 0)
+                    .level(user.getLevel() != null ? user.getLevel() : 1)
+                    .build());
         }
 
-        leaderboardRepository.deleteById(id);
+        return entries;
+    }
+
+    /**
+     * Optional manual eviction if you ever want immediate invalidation
+     * (e.g., after an admin reset or milestone event).
+     */
+    @CacheEvict(value = "top10Leaderboard", allEntries = true)
+    public void evictLeaderboardCache() {
+        log.info("Leaderboard cache manually evicted.");
     }
 }

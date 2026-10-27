@@ -40,7 +40,11 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "xp", nullable = false)
     @Builder.Default
-    private int xp = 0;
+    private Integer xp = 0;
+
+    @Column(name = "level",nullable = false)
+    @Builder.Default
+    private Integer level = 1;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default

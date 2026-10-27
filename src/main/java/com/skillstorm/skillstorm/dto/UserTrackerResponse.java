@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.dto;
 
 import com.skillstorm.skillstorm.model.Quiz;
+import com.skillstorm.skillstorm.model.UncompletedQuizProgress;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,7 +44,7 @@ public class UserTrackerResponse {
 
     // Attempt history overview
     private List<QuizAttemptResponse> attemptRecords;
-    private List<Quiz> completedQuizzes;
-    private List<Quiz> uncompletedQuizzes;
-    private List<Quiz> bookmarkedQuizzes;
+    private Set<Quiz> completedQuizzes;
+    private Set<UncompletedQuizProgress> uncompletedQuizzes;
+    private Set<Quiz> bookmarkedQuizzes;
 }

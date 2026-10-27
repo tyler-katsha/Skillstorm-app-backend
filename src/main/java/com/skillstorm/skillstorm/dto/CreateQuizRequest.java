@@ -1,13 +1,11 @@
 package com.skillstorm.skillstorm.dto;
 
-import com.skillstorm.skillstorm.enums.Difficulty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder

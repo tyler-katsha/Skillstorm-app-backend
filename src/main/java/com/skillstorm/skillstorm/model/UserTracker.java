@@ -3,15 +3,16 @@ package com.skillstorm.skillstorm.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "user_trackers")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +22,7 @@ public class UserTracker {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_tracker_id")
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -35,14 +37,9 @@ public class UserTracker {
     @Builder.Default
     private List<QuizAttemptRecord> attemptRecords = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_tracker_uncompleted_quizzes",
-            joinColumns = @JoinColumn(name = "user_tracker_id"),
-            inverseJoinColumns = @JoinColumn(name = "quiz_id")
-    )
+    @OneToMany(mappedBy = "userTracker", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Quiz> uncompletedQuizzes = new ArrayList<>();
+    private Set<UncompletedQuizProgress> uncompletedQuizzes = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -51,7 +48,7 @@ public class UserTracker {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @Builder.Default
-    private List<Quiz> completedQuizzes = new ArrayList<>();
+    private Set<Quiz> completedQuizzes = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -60,16 +57,57 @@ public class UserTracker {
             inverseJoinColumns = @JoinColumn(name = "quiz_id")
     )
     @Builder.Default
-    private List<Quiz> bookmarkedQuizzes = new ArrayList<>();
+    private Set<Quiz> bookmarkedQuizzes = new HashSet<>();
 
     public void addAttemptRecord(QuizAttemptRecord record) {
-        attemptRecords.add(record);
+        if (this.attemptRecords == null) {
+            this.attemptRecords = new ArrayList<>();
+        }
+        this.attemptRecords.add(record);
         record.setUserTracker(this);
     }
 
+    public void addOrUpdateUncompletedProgress(Quiz quiz, int currentQuestion, int totalQuestions, int percentage) {
+        if (this.uncompletedQuizzes == null) {
+            this.uncompletedQuizzes = new HashSet<>();
+        }
+
+        this.uncompletedQuizzes.stream()
+                .filter(p -> p.getQuiz() != null && Objects.equals(p.getQuiz().getQuizId(), quiz.getQuizId()))
+                .findFirst()
+                .ifPresentOrElse(
+                        existing -> {
+                            existing.setCurrentQuestion(currentQuestion);
+                            existing.setTotalQuestions(totalQuestions);
+                            existing.setPercentage(percentage);
+                            existing.setLastSavedAt(java.time.Instant.now());
+                        },
+                        () -> {
+                            UncompletedQuizProgress newProgress = UncompletedQuizProgress.builder()
+                                    .userTracker(this)
+                                    .quiz(quiz)
+                                    .currentQuestion(currentQuestion)
+                                    .totalQuestions(totalQuestions)
+                                    .percentage(percentage)
+                                    .lastSavedAt(java.time.Instant.now())
+                                    .build();
+                            this.uncompletedQuizzes.add(newProgress);
+                        }
+                );
+    }
+
+    public void removeUncompletedProgress(Integer quizId) {
+        if (this.uncompletedQuizzes != null && quizId != null) {
+            this.uncompletedQuizzes.removeIf(p -> p.getQuiz() != null && Objects.equals(p.getQuiz().getQuizId(), quizId));
+        }
+    }
+
     public int getNextAttemptNumberForQuiz(Integer quizId) {
+        if (this.attemptRecords == null || quizId == null) {
+            return 1;
+        }
         return (int) attemptRecords.stream()
-                .filter(a -> a.getQuiz() != null && a.getQuiz().getQuizId().equals(quizId))
+                .filter(a -> a.getQuiz() != null && Objects.equals(a.getQuiz().getQuizId(), quizId))
                 .count() + 1;
     }
 }

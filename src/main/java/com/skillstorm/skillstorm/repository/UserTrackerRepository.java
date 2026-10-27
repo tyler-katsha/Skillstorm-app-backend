@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface UserTrackerRepository extends JpaRepository<UserTracker,Integer> {
     @Query("SELECT ut FROM UserTracker ut WHERE ut.user.userId = :userId")
-    Optional<UserTracker> findByUserId(@Param("userId") int userId);
+    Optional<UserTracker> findByUserId(@Param("userId") Integer userId);
 }

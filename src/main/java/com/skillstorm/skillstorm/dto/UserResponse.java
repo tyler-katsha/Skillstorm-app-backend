@@ -20,7 +20,8 @@ public class UserResponse {
     private String username;
     private String email;
     private Set<Role> roles;
-    private int xp;
+    private Integer xp;
+    private Integer level;
     private List<Attempt> attempts;
     private List<Badge> badges;
     private String createdAt;

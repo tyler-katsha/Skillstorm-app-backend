@@ -29,6 +29,6 @@ public class UserTrackerRequest {
     private Boolean isPerfectQuiz;
 
     private Integer completedQuizId;
-    private List<Integer> uncompletedQuizIds;
-    private List<Integer> bookmarkedQuizIds;
+    private Set<Integer> uncompletedQuizIds;
+    private Set<Integer> bookmarkedQuizIds;
 }

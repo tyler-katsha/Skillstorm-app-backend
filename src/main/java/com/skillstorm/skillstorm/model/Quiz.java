@@ -1,9 +1,6 @@
 package com.skillstorm.skillstorm.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,4 +48,17 @@ public class Quiz {
     private List<Question> questions = new ArrayList<>();
 
     private String email;
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        Quiz quiz = (Quiz) o;
+        return Objects.equals(quizId,quiz.quizId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(quizId);
+    }
 }

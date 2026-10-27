@@ -7,11 +7,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class LeaderboardDto {
+@AllArgsConstructor
+public class LeaderboardEntryDto {
     private int rank;
-    private int points;
-    private int level;
+    private int userId;
     private String username;
+    private int xp;
+    private int level;
 }

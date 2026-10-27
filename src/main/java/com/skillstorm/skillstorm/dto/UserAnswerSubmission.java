@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class UserAnswerSubmission {
-    private int questionId;
-    private int selectedAnswerId;
+    private Integer questionId;
+    private Integer selectedAnswerId;
 }

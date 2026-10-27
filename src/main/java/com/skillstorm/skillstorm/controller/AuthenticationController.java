@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.controller;
 
 import com.skillstorm.skillstorm.dto.BloomUser;
+import com.skillstorm.skillstorm.dto.ForgotPassword;
 import com.skillstorm.skillstorm.dto.UserLogin;
 import com.skillstorm.skillstorm.dto.UserRegister;
 import com.skillstorm.skillstorm.enums.FilterType;
@@ -66,6 +67,16 @@ public class AuthenticationController {
             return ResponseEntity.ok(userService.takenType(type,bloom.getValue()));
         } catch(Exception e){
             return new ResponseEntity<>("Internal Server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPassword payload) {
+        try {
+            userService.forgotPassword(payload);
+            return ResponseEntity.ok().build();
+        } catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

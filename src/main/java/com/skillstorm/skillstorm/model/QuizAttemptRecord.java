@@ -1,22 +1,24 @@
 package com.skillstorm.skillstorm.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "quiz_attempt_records")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"userTracker", "quiz"})
 public class QuizAttemptRecord {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "attempt_id")
     private Long attemptId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,4 +42,17 @@ public class QuizAttemptRecord {
     @Builder.Default
     @Column(nullable = false, updatable = false)
     private Instant completedAt = Instant.now();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QuizAttemptRecord that = (QuizAttemptRecord) o;
+        return Objects.equals(attemptId, that.attemptId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(attemptId);
+    }
 }

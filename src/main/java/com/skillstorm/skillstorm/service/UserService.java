@@ -1,15 +1,12 @@
 package com.skillstorm.skillstorm.service;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.annotations.Beta;
 import com.google.common.hash.BloomFilter;
 import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.enums.FilterType;
-import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
@@ -18,7 +15,6 @@ import com.skillstorm.skillstorm.mappers.UserMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,6 +34,7 @@ public class UserService {
     private final BloomFilter<String> usernameFilter;
     private final BloomFilter<String> emailFilter;
     private final UserTrackerService userTrackerService;
+    private final EmailService emailService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -163,5 +160,15 @@ public class UserService {
 
     public void saveUncompletedQuiz(int userId, int quizId, UncompletedDto dto) {
         userTrackerService.saveUncompletedQuiz(userId,quizId,dto);
+    }
+
+    public void forgotPassword(ForgotPassword payload) {
+
+        var user = userRepository.findByEmail(payload.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        var token = tokenProvider.generateToken(user);
+
+        emailService.sendEmail(user.getEmail(),token);
     }
 }
