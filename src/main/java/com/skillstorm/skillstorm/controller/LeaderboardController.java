@@ -47,6 +47,6 @@ public class LeaderboardController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("leaderboard");
-        return ResponseEntity.ok( result+ "\nCache was checked");
+        return ResponseEntity.ok( result + "\nCache was checked");
     }
 }

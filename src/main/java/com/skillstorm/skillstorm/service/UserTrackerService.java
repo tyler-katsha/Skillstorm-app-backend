@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserTrackerService {
 
+    private static Map<Integer,Set<Quiz>> maps = new Hashtable<>();
     private static final int NOTHING = 0;
     private static final int MULTIPLIER = 10;
     private static final int QUIZ_WON = 50;
@@ -311,6 +312,14 @@ public class UserTrackerService {
 
         tracker.addOrUpdateUncompletedProgress(quiz, dto.getCurrentQuestion(), dto.getTotalQuestions(), dto.getPercentage());
 
+        Set<Quiz> quizzes = new HashSet<>();
+
+        quizzes.add(dto.getQuiz());
+        maps.putIfAbsent(userId,quizzes);
+
+        if(maps.containsKey(userId)) {
+            maps.get(userId).add(dto.getQuiz());
+        }
         userTrackerRepository.saveAndFlush(tracker);
     }
 

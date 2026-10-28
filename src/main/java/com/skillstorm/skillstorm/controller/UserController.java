@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
@@ -82,20 +83,22 @@ public class UserController {
     }
 
     @GetMapping("/history")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<ProfileTrackerAPIResponse> history(@AuthenticationPrincipal UserPrincipal principal) {
         try {
             return ResponseEntity.ok(userService.history(principal.getUserId()));
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
+        } catch(RateLimitExceededException e) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/uncompleted/{quizId}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId,@RequestBody UncompletedDto dto,@AuthenticationPrincipal UserPrincipal principal) {
         try {
