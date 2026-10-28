@@ -1,9 +1,6 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.BadgeDTO;
-import com.skillstorm.skillstorm.dto.UserDTO;
-import com.skillstorm.skillstorm.dto.UserRegister;
-import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,18 @@ public class UserMapperImpl implements UserMapper{
         List<BadgeDTO> badges = badgeMapper.mapToDto(user.getBadges());
 
         return new UserDTO(user.getUsername(),user.getXp(),badges);
+    }
+
+    @Override
+    public UserProfile mapToProfile(User user) {
+        return UserProfile.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .level(user.getXp())
+                .xp(user.getLevel())
+                .role(user.getRoles())
+                .build();
     }
 
     @Override

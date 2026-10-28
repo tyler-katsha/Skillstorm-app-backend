@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.controller;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.skillstorm.skillstorm.service.LeaderboardService;
 
+import java.time.temporal.ChronoUnit;
+
 @RestController
 @RequestMapping("/api/leaderboard")
 @RequiredArgsConstructor
@@ -27,10 +30,11 @@ public class LeaderboardController {
     private final InspectionCacheService inspectionCacheService;
 
     @GetMapping
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public ResponseEntity<?> getTop10Leaderboard() {
+    public ResponseEntity<?> findAll() {
         try{
-            return ResponseEntity.ok(leaderboardService.getTop10Leaderboard()); // 200 HTTP STATUS
+            return ResponseEntity.ok(leaderboardService.findAll()); // 200 HTTP STATUS
         } catch (ResourceNotFoundException e){
             return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
         } catch(Exception e){
@@ -39,6 +43,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("leaderboard");

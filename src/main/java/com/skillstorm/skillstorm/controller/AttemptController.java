@@ -1,8 +1,10 @@
 package com.skillstorm.skillstorm.controller;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class AttemptController {
 
     // Simple endpoint using explicit relationship ids
     @PostMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     public Attempt create(@RequestParam  Integer userId,
@@ -55,6 +58,7 @@ public class AttemptController {
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public Attempt update(@PathVariable Integer id, @RequestBody Attempt updated) {
         // TODO: Decide whether it is acceptable to force clients to send the ID in both the path and request body.
@@ -62,6 +66,7 @@ public class AttemptController {
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Integer id) {
@@ -69,6 +74,7 @@ public class AttemptController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("attempt");

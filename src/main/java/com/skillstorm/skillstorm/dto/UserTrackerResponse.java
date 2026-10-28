@@ -19,6 +19,7 @@ public class UserTrackerResponse {
 
     private Integer id;
     private Integer userId;
+    private Integer rank;
     private String username;
 
     // Flattened overall stats
@@ -44,7 +45,7 @@ public class UserTrackerResponse {
 
     // Attempt history overview
     private List<QuizAttemptResponse> attemptRecords;
-    private Set<Quiz> completedQuizzes;
-    private Set<UncompletedQuizProgress> uncompletedQuizzes;
-    private Set<Quiz> bookmarkedQuizzes;
+    private Set<QuizSummaryDto> completedQuizzes;
+    private Set<QuizSummaryDto> uncompletedQuizzes;
+    private Set<QuizSummaryDto> bookmarkedQuizzes;
 }

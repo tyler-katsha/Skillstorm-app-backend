@@ -118,6 +118,11 @@ public class UserService {
         return userRepository.findTop10ByOrderByXpDesc();
     }
 
+    @Cacheable(cacheNames = "user",key="'leaderboard_all'")
+    public List<User> findAllByOrderByXpDesc() {
+        return userRepository.findAllByOrderByXpDesc();
+    }
+
     @CachePut(cacheNames = "user",key="#user.userId")
     @Caching(evict = {
             @CacheEvict(cacheNames = "user",key="#user.userId"),
@@ -154,7 +159,7 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public UserTrackerResponse history(int userId) {
+    public ProfileTrackerAPIResponse history(int userId) {
         return userTrackerService.history(userId);
     }
 

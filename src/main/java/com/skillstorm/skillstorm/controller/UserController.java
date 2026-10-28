@@ -1,10 +1,10 @@
 package com.skillstorm.skillstorm.controller;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.skillstorm.skillstorm.dto.UncompletedDto;
-import com.skillstorm.skillstorm.dto.UserResponse;
-import com.skillstorm.skillstorm.dto.UserTrackerResponse;
+import com.skillstorm.skillstorm.annotations.RateLimited;
+import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.service.UserService;
 
@@ -38,6 +37,7 @@ public class UserController {
 
     // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
+    @RateLimited(capacity = 30,tokens = 30,duration = 10,unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<UserResponse> getLoggedInUser(@AuthenticationPrincipal UserPrincipal principal) {
         // TODO: Get user ID from request header
@@ -45,24 +45,28 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public UserResponse getById(@PathVariable Integer id) {
         return userService.getById(id);
     }
 
     @GetMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAll() {
         return userService.getAll();
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public User update(@PathVariable Integer id, @RequestBody User updated) {
         return userService.update(updated);
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public void delete(@PathVariable Integer id) {
@@ -70,6 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("user");
@@ -77,8 +82,9 @@ public class UserController {
     }
 
     @GetMapping("/history")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public ResponseEntity<UserTrackerResponse> history(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<ProfileTrackerAPIResponse> history(@AuthenticationPrincipal UserPrincipal principal) {
         try {
             return ResponseEntity.ok(userService.history(principal.getUserId()));
         } catch(ResourceNotFoundException e) {
@@ -89,6 +95,7 @@ public class UserController {
     }
 
     @PostMapping("/uncompleted/{quizId}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId,@RequestBody UncompletedDto dto,@AuthenticationPrincipal UserPrincipal principal) {
         try {

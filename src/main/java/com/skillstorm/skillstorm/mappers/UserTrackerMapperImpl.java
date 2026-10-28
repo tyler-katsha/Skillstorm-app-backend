@@ -1,8 +1,6 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.QuizAttemptResponse;
-import com.skillstorm.skillstorm.dto.UserTrackerRequest;
-import com.skillstorm.skillstorm.dto.UserTrackerResponse;
+import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.QuizRepository;
@@ -42,6 +40,22 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                   .toList()
                 : List.of();
 
+        // 1. Map to DTOs instead of passing raw entities
+        Set<QuizSummaryDto> completedQuizzes = tracker.getCompletedQuizzes() != null
+                ? tracker.getCompletedQuizzes().stream().map(this::mapToQuizSummary).collect(Collectors.toSet())
+                : new HashSet<>();
+
+        Set<QuizSummaryDto> bookmarkedQuizzes = tracker.getBookmarkedQuizzes() != null
+                ? tracker.getBookmarkedQuizzes().stream().map(this::mapToQuizSummary).collect(Collectors.toSet())
+                : new HashSet<>();
+
+        Set<QuizSummaryDto> uncompletedQuizzes = tracker.getUncompletedQuizzes() != null
+                ? tracker.getUncompletedQuizzes().stream()
+                  .filter(uq -> uq.getQuiz() != null)
+                  .map(uq -> mapToQuizSummary(uq.getQuiz()))
+                  .collect(Collectors.toSet())
+                : new HashSet<>();
+
         return UserTrackerResponse.builder()
                 .id(tracker.getId())
                 .userId(tracker.getUser() != null ? tracker.getUser().getUserId() : null)
@@ -60,10 +74,55 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .totalQuestionsAnswered(stats.getTotalQuestionsAnswered() != null ? stats.getTotalQuestionsAnswered() : 0)
                 .totalCorrectAnswers(stats.getTotalCorrectAnswers() != null ? stats.getTotalCorrectAnswers() : 0)
                 .accuracyRate(stats.getAccuracyRate())
-                .completedQuizzes(tracker.getCompletedQuizzes() != null ? new HashSet<>(tracker.getCompletedQuizzes()) : new HashSet<>())
-                .uncompletedQuizzes(tracker.getUncompletedQuizzes() != null ? new HashSet<>(tracker.getUncompletedQuizzes()) : new HashSet<>())
-                .bookmarkedQuizzes(tracker.getBookmarkedQuizzes() != null ? new HashSet<>(tracker.getBookmarkedQuizzes()) : new HashSet<>())
+                // 2. Pass the mapped DTOs into the builder
+                .completedQuizzes(completedQuizzes)
+                .uncompletedQuizzes(uncompletedQuizzes)
+                .bookmarkedQuizzes(bookmarkedQuizzes)
                 .attemptRecords(attempts)
+                .build();
+    }
+
+    // ... (mapToHistory and mapBackToObj remain exactly the same as your code)
+
+    public QuizAttemptResponse mapAttemptToDto(QuizAttemptRecord record) {
+        if (record == null) return null;
+
+        return QuizAttemptResponse.builder()
+                .attemptId(record.getAttemptId())
+                .quizId(record.getQuiz() != null ? record.getQuiz().getQuizId() : null)
+                .attemptNumber(record.getAttemptNumber())
+                .questionsAnswered(record.getQuestionsAnswered())
+                .correctAnswers(record.getCorrectAnswers())
+                .timeSpentSeconds(record.getTimeSpentSeconds())
+                .gainedXp(record.getGainedXp())
+                .isQuizWon(record.getIsQuizWon())
+                .isPerfectQuiz(record.getIsPerfectQuiz())
+                .completedAt(record.getCompletedAt())
+                .build();
+    }
+
+    // 3. New Helper method to handle Quiz mapping cleanly
+    private QuizSummaryDto mapToQuizSummary(Quiz quiz) {
+        if (quiz == null) return null;
+
+        List<String> topicNames = quiz.getTopics() != null
+                ? quiz.getTopics().stream().map(Topic::getName).toList()
+                : Collections.emptyList();
+
+        int totalQuestions = quiz.getQuestions() != null ? quiz.getQuestions().size() : 0;
+
+        return QuizSummaryDto.builder()
+                .id(quiz.getQuizId()) // Assuming the ID field is getQuizId() based on your other code
+                .title(quiz.getTitle())
+                .topicNames(topicNames)
+                .totalQuestions(totalQuestions)
+                .build();
+    }
+
+    @Override
+    public ProfileTrackerAPIResponse mapToHistory(UserTrackerResponse trackerResponse) {
+        return ProfileTrackerAPIResponse.builder()
+                .userTrackerResponse(trackerResponse)
                 .build();
     }
 
@@ -148,22 +207,5 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
         }
 
         return tracker;
-    }
-
-    public QuizAttemptResponse mapAttemptToDto(QuizAttemptRecord record) {
-        if (record == null) return null;
-
-        return QuizAttemptResponse.builder()
-                .attemptId(record.getAttemptId())
-                .quizId(record.getQuiz() != null ? record.getQuiz().getQuizId() : null)
-                .attemptNumber(record.getAttemptNumber())
-                .questionsAnswered(record.getQuestionsAnswered())
-                .correctAnswers(record.getCorrectAnswers())
-                .timeSpentSeconds(record.getTimeSpentSeconds())
-                .gainedXp(record.getGainedXp())
-                .isQuizWon(record.getIsQuizWon())
-                .isPerfectQuiz(record.getIsPerfectQuiz())
-                .completedAt(record.getCompletedAt())
-                .build();
     }
 }

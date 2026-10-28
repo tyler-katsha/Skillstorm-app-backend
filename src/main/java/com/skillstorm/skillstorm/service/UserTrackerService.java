@@ -2,13 +2,12 @@ package com.skillstorm.skillstorm.service;
 
 import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.mappers.UserMapper;
 import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import com.skillstorm.skillstorm.repository.UserTrackerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,13 +33,15 @@ public class UserTrackerService {
     private static final double DEFAULT_RATE = 0.0;
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final UserTrackerRepository userTrackerRepository;
     private final QuizRepository quizRepository;
     private final PointService pointService;
+    private final LeaderboardService leaderboardService;
 
-    @CacheEvict(value = "top10Leaderboard", key = "'top10'")
     @Transactional
     public SubmissionResultDto submit(int id, SubmissionPayload payload, int userId) {
+        leaderboardService.evictLeaderboardCache();
         try {
             if (payload == null) {
                 throw new IllegalArgumentException("Payload cannot be null");
@@ -72,7 +73,7 @@ public class UserTrackerService {
                     Integer selectedId = answerMap.get(question.getQuestionId());
                     if (selectedId != null && question.getAnswers() != null) {
                         boolean isCorrect = question.getAnswers().stream()
-                                .anyMatch(a -> Objects.equals(a.getAnswerId(), selectedId) && Boolean.TRUE.equals(a.isCorrect()));
+                                .anyMatch(a -> Objects.equals(a.getAnswerId(), selectedId) && a.isCorrect());
                         if (isCorrect) {
                             correctAnswers++;
                         }
@@ -182,7 +183,7 @@ public class UserTrackerService {
     }
 
     @Transactional
-    public UserTrackerResponse history(int userId) {
+    public ProfileTrackerAPIResponse history(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with id: " + userId));
 
@@ -223,11 +224,44 @@ public class UserTrackerService {
                   .collect(Collectors.toList())
                 : Collections.emptyList();
 
-        Set<UncompletedQuizProgress> uncompletedQuizSet = tracker.getUncompletedQuizzes() != null ? new HashSet<>(tracker.getUncompletedQuizzes()) : Collections.emptySet();
-        Set<Quiz> bookmarkedQuizSet = tracker.getBookmarkedQuizzes() != null ? new HashSet<>(tracker.getBookmarkedQuizzes()) : Collections.emptySet();
-        Set<Quiz> completedQuizSet = tracker.getCompletedQuizzes() != null ? new HashSet<>(tracker.getCompletedQuizzes()) : Collections.emptySet();
+        Set<QuizSummaryDto> completedQuizSet = tracker.getCompletedQuizzes() != null
+                ? tracker.getCompletedQuizzes().stream()
+                  .map(q -> QuizSummaryDto.builder()
+                            .id(q.getQuizId())
+                            .title(q.getTitle())
+                          // Assuming your Quiz has getTopics() which returns a list of Topic entities
+                            .topicNames(q.getTopics() != null ? q.getTopics().stream().map(topic -> topic.getName()).collect(Collectors.toList()) : Collections.emptyList())
+                            .totalQuestions(q.getQuestions() != null ? q.getQuestions().size() : 0)
+                            .build())
+                  .collect(Collectors.toSet())
+                : Collections.emptySet();
 
-        return UserTrackerResponse.builder()
+        Set<QuizSummaryDto> bookmarkedQuizSet = tracker.getBookmarkedQuizzes() != null
+                ? tracker.getBookmarkedQuizzes().stream()
+                  .map(q -> QuizSummaryDto.builder()
+                            .id(q.getQuizId())
+                            .title(q.getTitle())
+                            .topicNames(q.getTopics() != null ? q.getTopics().stream().map(topic -> topic.getName()).collect(Collectors.toList()) : Collections.emptyList())
+                            .totalQuestions(q.getQuestions() != null ? q.getQuestions().size() : 0)
+                            .build())
+                  .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        Set<QuizSummaryDto> uncompletedQuizSet = tracker.getUncompletedQuizzes() != null
+                ? tracker.getUncompletedQuizzes().stream()
+                  .map(uq -> {
+                      var q = uq.getQuiz(); // Extract the quiz from the progress entity
+                      return QuizSummaryDto.builder()
+                             .id(q.getQuizId())
+                             .title(q.getTitle())
+                             .topicNames(q.getTopics() != null ? q.getTopics().stream().map(topic -> topic.getName()).collect(Collectors.toList()) : Collections.emptyList())
+                             .totalQuestions(q.getQuestions() != null ? q.getQuestions().size() : 0)
+                             .build();
+                  })
+                  .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        UserTrackerResponse response = UserTrackerResponse.builder()
                 .id(tracker.getId())
                 .userId(user.getUserId())
                 .username(user.getUsername())
@@ -249,6 +283,15 @@ public class UserTrackerService {
                 .completedQuizzes(completedQuizSet)
                 .uncompletedQuizzes(uncompletedQuizSet)
                 .bookmarkedQuizzes(bookmarkedQuizSet)
+                .build();
+
+        UserProfile profileDetails = userMapper.mapToProfile(user);
+        int rank = leaderboardService.getUserGlobalRank(userId);
+
+        return ProfileTrackerAPIResponse.builder()
+                .user(profileDetails)
+                .userTrackerResponse(response)
+                .rank(rank)
                 .build();
     }
 

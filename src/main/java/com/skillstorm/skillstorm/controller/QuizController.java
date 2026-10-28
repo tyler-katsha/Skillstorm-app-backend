@@ -1,7 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.*;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.model.Question;
@@ -34,6 +36,7 @@ public class QuizController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Quiz> create(@RequestBody CreateQuizRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try{
@@ -48,18 +51,21 @@ public class QuizController {
     }
 
     @GetMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public QuizDTO getById(@PathVariable Integer id) {
         return quizService.getById(id);
     }
 
     @GetMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<QuizDTO> getAll() {
         return quizService.getAll();
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody UpdateQuizRequest updatedQuiz, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
@@ -75,6 +81,7 @@ public class QuizController {
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
@@ -87,13 +94,17 @@ public class QuizController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("quiz");
         return ResponseEntity.ok("Cache was checked");
     }
 
+
     @PostMapping("/{id}/submit")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<SubmissionResultDto> submit(@PathVariable int id, @RequestBody SubmissionPayload payload, @AuthenticationPrincipal UserPrincipal principal) {
         try {
 
@@ -102,7 +113,6 @@ public class QuizController {
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch(Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

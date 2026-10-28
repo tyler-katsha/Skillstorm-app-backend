@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.controller;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.BloomUser;
 import com.skillstorm.skillstorm.dto.ForgotPassword;
 import com.skillstorm.skillstorm.dto.UserLogin;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.temporal.ChronoUnit;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class AuthenticationController {
     private final UserService userService;
     private final EmailService emailService;
 
+    @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegister request){
         try{
@@ -47,6 +51,7 @@ public class AuthenticationController {
         }
     }
 
+    @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserLogin request){
         try{
@@ -54,11 +59,11 @@ public class AuthenticationController {
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/bloom")
     public ResponseEntity<?> bloomFilter(@RequestBody BloomUser bloom){
 
@@ -70,6 +75,7 @@ public class AuthenticationController {
         }
     }
 
+    @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPassword payload) {
         try {

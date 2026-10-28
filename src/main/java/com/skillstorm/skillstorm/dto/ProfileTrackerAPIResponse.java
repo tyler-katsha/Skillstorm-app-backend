@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LeaderboardEntryDto {
-    private int rank;
-    private int userId;
-    private String username;
-    private int xp;
-    private int level;
+public class ProfileTrackerAPIResponse {
+
+    private UserProfile user;
+    private UserTrackerResponse userTrackerResponse;
+    private Integer rank;
 }

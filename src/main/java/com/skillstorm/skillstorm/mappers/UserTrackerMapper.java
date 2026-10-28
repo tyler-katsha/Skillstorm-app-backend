@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.mappers;
 
+import com.skillstorm.skillstorm.dto.ProfileTrackerAPIResponse;
 import com.skillstorm.skillstorm.dto.QuizAttemptResponse;
 import com.skillstorm.skillstorm.dto.UserTrackerRequest;
 import com.skillstorm.skillstorm.dto.UserTrackerResponse;
@@ -36,6 +37,8 @@ public interface UserTrackerMapper {
     @Mapping(target = "bookmarkedQuizIds", source = "bookmarkedQuizzes", qualifiedByName = "quizzesToIds")
     @Mapping(target = "attemptRecords", source = "attemptRecords")
     UserTrackerResponse mapToDto(UserTracker tracker);
+
+    ProfileTrackerAPIResponse mapToHistory(UserTrackerResponse trackerResponse);
 
     @Mapping(target = "quizId", source = "quiz.id")
     QuizAttemptResponse mapAttemptToDto(QuizAttemptRecord record);

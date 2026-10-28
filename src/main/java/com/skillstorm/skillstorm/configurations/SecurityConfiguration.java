@@ -3,7 +3,9 @@ package com.skillstorm.skillstorm.configurations;
 import com.skillstorm.skillstorm.jwts.JwtAuthenticationFilter;
 import com.skillstorm.skillstorm.oauth.OAuthAuthenticationFailureHandler;
 import com.skillstorm.skillstorm.oauth.OAuthAuthenticationSuccessHandler;
+import com.skillstorm.skillstorm.ratelimiting.TlsFingerprintFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,14 +29,13 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private OAuthAuthenticationSuccessHandler successHandler;
-    @Autowired
-    private OAuthAuthenticationFailureHandler failureHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuthAuthenticationSuccessHandler successHandler;
+    private final OAuthAuthenticationFailureHandler failureHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http){
         return http

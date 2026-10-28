@@ -1,7 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -61,6 +63,7 @@ public class TopicController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("topic");

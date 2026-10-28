@@ -52,9 +52,6 @@ public class UncompletedQuizProgress {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                userTracker != null ? userTracker.getId() : null,
-                quiz != null ? quiz.getQuizId() : null
-        );
+        return Objects.hash(userTracker != null ? userTracker.getId() : null, quiz != null ? quiz.getQuizId() : null);
     }
 }

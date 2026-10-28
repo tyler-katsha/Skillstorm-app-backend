@@ -1,7 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.BadgeDTO;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
@@ -34,6 +36,7 @@ public class BadgeController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public ResponseEntity<?> create(@RequestBody BadgeDTO dto, @AuthenticationPrincipal UserPrincipal principal) {
         try{
@@ -59,12 +62,14 @@ public class BadgeController {
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public Badge update(@PathVariable Integer id, @RequestBody Badge updated) {
         return badgeService.update(id, updated);
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
@@ -79,6 +84,7 @@ public class BadgeController {
     }
 
     @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         inspectionCacheService.inspectCache("badge");

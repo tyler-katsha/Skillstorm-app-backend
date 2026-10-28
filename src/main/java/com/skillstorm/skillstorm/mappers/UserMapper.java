@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.mappers;
 
 import com.skillstorm.skillstorm.dto.UserDTO;
+import com.skillstorm.skillstorm.dto.UserProfile;
 import com.skillstorm.skillstorm.dto.UserRegister;
 import com.skillstorm.skillstorm.dto.UserResponse;
 import com.skillstorm.skillstorm.model.User;
@@ -15,5 +16,6 @@ public interface UserMapper {
     User toUser(UserRegister request);
 
     UserDTO mapToDto(User user);
+    UserProfile mapToProfile(User user);
     UserResponse mapToResponse(User user);
 }
