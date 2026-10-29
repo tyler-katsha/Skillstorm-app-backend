@@ -34,7 +34,10 @@ public class LeaderboardController {
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<?> findAll() {
         try{
-            return ResponseEntity.ok(leaderboardService.findAll()); // 200 HTTP STATUS
+            var all = leaderboardService.findAll();
+
+            System.out.println(all);
+            return ResponseEntity.ok(all); // 200 HTTP STATUS
         } catch (ResourceNotFoundException e){
             return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
         } catch(Exception e){
