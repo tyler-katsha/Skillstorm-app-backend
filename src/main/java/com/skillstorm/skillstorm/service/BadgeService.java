@@ -1,8 +1,14 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
+import com.skillstorm.skillstorm.dto.BadgeDTO;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.Badge;
@@ -11,41 +17,38 @@ import com.skillstorm.skillstorm.repository.BadgeRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class BadgeService {
 
     private final BadgeRepository badgeRepository;
     private final UserRepository userRepository;
 
-    public BadgeService(BadgeRepository badgeRepository, UserRepository userRepository) {
-        this.badgeRepository = badgeRepository;
-        this.userRepository = userRepository;
-    }
+    public Badge create(BadgeDTO dto, Integer userId) {
+        User user = userId == null ? null : userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
-    public Badge create(String title, String description, Integer userId) {
-        if (userId == null) {
-            throw new NullPointerException("userId is null in call to method `Badge create(String title, String description, Integer userId)`");
-        }
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            return new NoSuchElementException(String.format("Could not find user by id %d.", userId));
-        });
-        Badge badge = new Badge();
-        badge.setName(title);
-        badge.setDescription(description);
-        badge.setUser(user);
+        Badge badge = Badge.builder()
+                .name(dto.name())
+                .description(dto.description())
+                .user(user)
+                .build();
 
         return badgeRepository.save(badge);
     }
 
+    @Cacheable(cacheNames = "badge",key="#id")
     public Badge getById(Integer id) {
-        return badgeRepository.findById(id).orElseThrow(() -> {
-            return new NoSuchElementException(String.format("Could not find badge by id %d.", id));
-        });
+        return badgeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Badge not found: " + id));
     }
-
+    @Cacheable(cacheNames = "badge",key="'all'")
     public List<Badge> getAll() {
         return badgeRepository.findAll();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "badge",key="'all'")
+    })
     public Badge update(Integer id, Badge updated) {
         Badge existing = getById(id);
 
@@ -55,10 +58,13 @@ public class BadgeService {
 
         return badgeRepository.save(existing);
     }
-
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "badge",key="#id"),
+            @CacheEvict(cacheNames = "badge",key="'all'")
+    })
     public void delete(Integer id) {
         if (!badgeRepository.existsById(id)) {
-            throw new IllegalArgumentException("Badge not found: " + id);
+            throw new ResourceNotFoundException("Badge not found: " + id);
         }
         badgeRepository.deleteById(id);
     }

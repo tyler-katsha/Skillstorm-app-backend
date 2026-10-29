@@ -1,9 +1,6 @@
 package com.skillstorm.skillstorm.dto;
 
 import java.util.List;
+import java.util.Set;
 
-record AnswerDTO(String text, boolean isCorrect) {}
-
-record QuestionDTO(String text, int score, List<AnswerDTO> answers) {}
-
-public record QuizDTO(String title, String difficulty, List<String> topicNames, List<QuestionDTO> questions) {}
+public record QuizDTO(int id, String title, String difficulty, List<String> topicNames, List<QuestionResponse> questions) {}

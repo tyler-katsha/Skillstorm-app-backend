@@ -1,8 +1,19 @@
 package com.skillstorm.skillstorm.controller;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
+import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.oauth.UserPrincipal;
+import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,51 +25,89 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(originPatterns={"http://localhost:[*]"})
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final InspectionCacheService inspectionCacheService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        return userService.create(user);
-    }
-
+    // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
-    public UserDTO getLoggedInUser() {
+    @RateLimited(capacity = 30,tokens = 30,duration = 10,unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<UserResponse> getLoggedInUser(@AuthenticationPrincipal UserPrincipal principal) {
         // TODO: Get user ID from request header
-        return userService.getById(1);
+        return ResponseEntity.ok(userService.getById(principal.getUserId()));
     }
 
     @GetMapping("/{id}")
-    public UserDTO getById(@PathVariable Integer id) {
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public UserResponse getById(@PathVariable Integer id) {
         return userService.getById(id);
     }
 
     @GetMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAll() {
         return userService.getAll();
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public User update(@PathVariable Integer id, @RequestBody User updated) {
         return userService.update(updated);
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public void delete(@PathVariable Integer id) {
         userService.delete(id);
+    }
+
+    @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> cache(){
+        inspectionCacheService.inspectCache("user");
+        return ResponseEntity.ok("Cache was checked");
+    }
+
+    @GetMapping("/history")
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<ProfileTrackerAPIResponse> history(@AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            return ResponseEntity.ok(userService.history(principal.getUserId()));
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch(RateLimitExceededException e) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/uncompleted/{quizId}")
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId,@RequestBody UncompletedDto dto,@AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            userService.saveUncompletedQuiz(principal.getUserId(),quizId,dto);
+            return ResponseEntity.ok().build();
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

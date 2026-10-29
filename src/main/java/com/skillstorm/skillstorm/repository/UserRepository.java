@@ -2,7 +2,21 @@ package com.skillstorm.skillstorm.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.skillstorm.skillstorm.model.User;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    public User findByUsername (String username);
+    Optional<User> findByEmail(String email);
+    List<User> findTop10ByOrderByXpDesc();
+    List<User> findAllByOrderByXpDesc();
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+
+    @Query("SELECT user.username FROM User user")
+    List<String> findAllUsername();
+    @Query("SELECT user.email FROM User user")
+    List<String> findAllEmail();
+
 }

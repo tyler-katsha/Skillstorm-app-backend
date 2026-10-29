@@ -1,9 +1,15 @@
 package com.skillstorm.skillstorm.controller;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.skillstorm.skillstorm.annotations.RateLimited;
+import com.skillstorm.skillstorm.service.InspectionCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,17 +26,18 @@ import com.skillstorm.skillstorm.service.AttemptService;
 
 @RestController
 @RequestMapping("/api/attempts")
+@RequiredArgsConstructor
 public class AttemptController {
 
     private final AttemptService attemptService;
+    private final InspectionCacheService inspectionCacheService;
 
-    public AttemptController(AttemptService attemptService) {
-        this.attemptService = attemptService;
-    }
 
     // Simple endpoint using explicit relationship ids
     @PostMapping
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Attempt create(@RequestParam  Integer userId,
                             @RequestParam Integer quizId,
                             @RequestParam int score,
@@ -39,24 +46,38 @@ public class AttemptController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public Attempt getById(@PathVariable Integer id) {
         return attemptService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<Attempt> getAll() {
         return attemptService.getAll();
     }
 
     @PutMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasRole('ADMIN')")
     public Attempt update(@PathVariable Integer id, @RequestBody Attempt updated) {
         // TODO: Decide whether it is acceptable to force clients to send the ID in both the path and request body.
         return attemptService.update(updated);
     }
 
     @DeleteMapping("/{id}")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Integer id) {
         attemptService.delete(id);
+    }
+
+    @GetMapping("/cache")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> cache(){
+        inspectionCacheService.inspectCache("attempt");
+        return ResponseEntity.ok("Cache was checked");
     }
 }

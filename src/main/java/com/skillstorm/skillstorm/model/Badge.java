@@ -9,14 +9,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Badge")
+@Table(name = "badge")
+@Data // Getter, Setter, toString, hashCode, etc...
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Badge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "achievement_id")
-    private int achievementId;
+    private Integer achievementId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
@@ -27,23 +35,4 @@ public class Badge {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    // Constructors, getters, and setters
-    public Badge() {}
-
-    public Badge(User user, String name, String description) {
-        this.user = user;
-        this.name = name;
-        this.description = description;
-    }
-
-    // Getters and setters
-    public int getAchievementId() { return achievementId; }
-    public void setAchievementId(int achievementId) { this.achievementId = achievementId; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 }

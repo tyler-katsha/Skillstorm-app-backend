@@ -1,25 +1,23 @@
 package com.skillstorm.skillstorm.model;
 
-import java.util.List;
+import java.util.*;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "quiz")
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "quiz_id")
-    private int quizId;
+    private Integer quizId;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -27,34 +25,40 @@ public class Quiz {
     @Column(name = "difficulty", nullable = false)
     private String difficulty; // "Easy", "Medium", "Hard"
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
-        name = "topic_quiz",
-        joinColumns = @JoinColumn(name = "quiz_id"),
-        inverseJoinColumns = @JoinColumn(name = "topic_id")
+            name = "topic_quiz",
+            joinColumns = @JoinColumn(name = "quiz_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
-    private List<Topic> topics;
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Topic> topics = new ArrayList<>();
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Question> questions;
+    @OneToMany(
+            mappedBy = "quiz",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Question> questions = new ArrayList<>();
 
-    // Constructors, getters, and setters
-    public Quiz() {}
+    private String email;
 
-    public Quiz(String title, String difficulty) {
-        this.title = title;
-        this.difficulty = difficulty;
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        Quiz quiz = (Quiz) o;
+        return Objects.equals(quizId,quiz.quizId);
     }
 
-    // Getters and setters
-    public int getQuizId() { return quizId; }
-    public void setQuizId(int quizId) { this.quizId = quizId; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDifficulty() { return difficulty; }
-    public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
-    public List<Topic> getTopics() { return topics; }
-    public void setTopics(List<Topic> topics) { this.topics = topics; }
-    public List<Question> getQuestions() { return questions; }
-    public void setQuestions(List<Question> questions) { this.questions = questions; }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(quizId);
+    }
 }

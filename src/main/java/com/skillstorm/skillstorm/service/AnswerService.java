@@ -2,45 +2,53 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.Answer;
 import com.skillstorm.skillstorm.repository.AnswerRepository;
 
 @Service
+@RequiredArgsConstructor
 public class AnswerService {
     private final AnswerRepository answerRepository;
 
-    @Autowired
-    public AnswerService(AnswerRepository answerRepository) {
-        this.answerRepository = answerRepository;
-    }
-
-    public Answer create(Answer answer) {
+    public Answer createAnswer(Answer answer) {
         return answerRepository.save(answer);
     }
 
-    public Answer getById(int answerId) {
+    @Cacheable(cacheNames = "answer",key="#answerId")
+    public Answer findById(int answerId) {
         return answerRepository.findById(answerId).orElse(null);
     }
 
-    public List<Answer> getAll() {
+    @Cacheable(cacheNames = "answer",key="'all'")
+    public List<Answer> findAll() {
         return answerRepository.findAll();
     }
 
+    @Cacheable(cacheNames = "questionAnswers",key="#questionId")
     public List<Answer> getAnswersByQuestionId(int questionId) {
-        // Custom query would be better here
-        return answerRepository.findAll().stream()
-                .filter(a -> a.getQuestion().getQuestionId() == questionId)
-                .toList();
+        return answerRepository.findByQuestionQuestionId(questionId);
     }
 
-    public Answer update(Answer answer) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "answer", key = "'all'"),
+    })
+    public Answer updateAnswer(Answer answer) {
         return answerRepository.save(answer);
     }
 
-    public void delete(int answerId) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "answer", key = "#answerId"),
+            @CacheEvict(cacheNames = "answer", key = "'all'"),
+    })
+    public void deleteAnswer(int answerId) {
         answerRepository.deleteById(answerId);
     }
 }

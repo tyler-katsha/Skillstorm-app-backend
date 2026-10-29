@@ -11,14 +11,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Attempt")
+@Table(name = "attempt")
+@Data // Getter, Setter, toString, hashCode, etc...
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Attempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attempt_id")
-    private int attemptId;
+    private Integer attemptId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
@@ -33,27 +41,4 @@ public class Attempt {
 
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
-
-    // Constructors, getters, and setters
-    public Attempt() {
-        this.time = LocalDateTime.now();
-    }
-
-    public Attempt(User user, Quiz quiz) {
-        this.user = user;
-        this.quiz = quiz;
-        this.time = LocalDateTime.now();
-    }
-
-    // Getters and setters
-    public int getAttemptId() { return attemptId; }
-    public void setAttemptId(int attemptId) { this.attemptId = attemptId; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
-    public int getScore() { return score; }
-    public void setScore(int score) { this.score = score; }
-    public LocalDateTime getTime() { return time; }
-    public void setTime(LocalDateTime time) { this.time = time; }
 }

@@ -1,54 +1,179 @@
 package com.skillstorm.skillstorm.service;
 
-import java.util.List;
-import java.util.NoSuchElementException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
+
+import com.google.common.hash.BloomFilter;
+import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.enums.FilterType;
+import com.skillstorm.skillstorm.exceptions.AuthorizationException;
+import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
+import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
+import com.skillstorm.skillstorm.mappers.UserMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.skillstorm.skillstorm.dto.Mapper;
-import com.skillstorm.skillstorm.dto.UserDTO;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final Mapper mapper;
+    private final UserMapper userMapper;
+    private final JwtTokenProvider tokenProvider;
+    private final BloomFilter<String> usernameFilter;
+    private final BloomFilter<String> emailFilter;
+    private final UserTrackerService userTrackerService;
+    private final EmailService emailService;
 
-    @Autowired
-    public UserService(UserRepository userRepository, Mapper mapper) {
-        this.userRepository = userRepository;
-        this.mapper = mapper;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
+
+    @PostConstruct
+    public void init(){
+        List<String> existingUsernames = userRepository.findAllUsername();
+        existingUsernames.forEach(usernameFilter::put);
+
+        List<String> existingEmails = userRepository.findAllEmail();
+        existingEmails.forEach(emailFilter::put);
     }
 
-    public User create(User user) {
-        return userRepository.save(user);
+    public String register(UserRegister request) {
+
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+
+        if(existingUser.isPresent()){
+            throw new AuthorizationException(String.format("Existing user with email: %s already exist",request.getEmail()));
+        }
+
+        User user = userMapper.toUser(request);
+
+        if(isUsernameTaken(user.getUsername())){
+            throw new UsernameTakenException(user.getUsername() + " already exist");
+        }
+        // hashes the password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        userRepository.save(user);
+
+        usernameFilter.put(user.getUsername());
+        emailFilter.put(user.getEmail());
+
+        return "Account created Successfully";
     }
 
-    public UserDTO getById(int userId) {
-        return mapper.mapToDto(userRepository.findById(userId).orElseThrow(() -> {
-            return new NoSuchElementException(String.format("Could not find user by id %d.", userId));
-        }));
+    public String login(UserLogin request){
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthorizationException("Invalid Credentials"));
+
+        // check if the hash matches with the one entered and in the db password
+        if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
+            throw new AuthorizationException("Invalid Credentials");
+        }
+
+
+        // generate jwt token and sends it to frontend
+        return tokenProvider.generateToken(user);
     }
 
-    public UserDTO getUserByUsername(String username) {
-        return mapper.mapToDto(userRepository.findByUsername(username));
+    @Cacheable(cacheNames = "user",key="#userId")
+    public UserResponse getById(int userId) {
+
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        return userMapper.mapToResponse(existingUser);
     }
 
+    @Cacheable(cacheNames = "emailUsers",key="#email")
+    public UserDTO findByEmail(String email) {
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        return userMapper.mapToDto(existingUser);
+    }
+
+    @Cacheable(cacheNames = "user",key="'all'")
     public List<UserDTO> getAll() {
         return userRepository
             .findAll()
             .stream()
-            .map(mapper::mapToDto)
+            .map(userMapper::mapToDto)
             .toList();
     }
 
+    @Cacheable(cacheNames = "user",key="'top10'")
+    public List<User> findTop10ByOrderByXpDesc(){
+        return userRepository.findTop10ByOrderByXpDesc();
+    }
+
+    @Cacheable(cacheNames = "user",key="'leaderboard_all'")
+    public List<User> findAllByOrderByXpDesc() {
+        return userRepository.findAllByOrderByXpDesc();
+    }
+
+    @CachePut(cacheNames = "user",key="#user.userId")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "user",key="#user.userId"),
+            @CacheEvict(cacheNames = "usernameUsers",key="#user.username"),
+            @CacheEvict(cacheNames = "user",key="'all'")
+    })
+    @Transactional
     public User update(User user) {
         return userRepository.save(user);
     }
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "user",key="#userId"),
+            @CacheEvict(cacheNames = "user",key="'all'")
+    })
 
+    @Transactional
     public void delete(int userId) {
         userRepository.deleteById(userId);
+    }
+
+    public boolean takenType(FilterType type, String val){
+        return switch(type) {
+            case EMAIL -> isEmailTaken(val);
+            case USERNAME -> isUsernameTaken(val);
+        };
+    }
+    private boolean isUsernameTaken(String username){
+        if(!usernameFilter.mightContain(username)) return false;
+        return userRepository.existsByUsername(username);
+    }
+
+    private boolean isEmailTaken(String email){
+        if(!emailFilter.mightContain(email)) return false;
+        return userRepository.existsByEmail(email);
+    }
+
+    public ProfileTrackerAPIResponse history(int userId) {
+        return userTrackerService.history(userId);
+    }
+
+    public void saveUncompletedQuiz(int userId, int quizId, UncompletedDto dto) {
+        userTrackerService.saveUncompletedQuiz(userId,quizId,dto);
+    }
+
+    public void forgotPassword(ForgotPassword payload) {
+
+        var user = userRepository.findByEmail(payload.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        var token = tokenProvider.generateToken(user);
+
+        emailService.sendEmail(user.getEmail(),token);
     }
 }

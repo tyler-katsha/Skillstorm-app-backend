@@ -1,24 +1,28 @@
 package com.skillstorm.skillstorm.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "question")
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode
+@Builder
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    private int questionId;
+    @EqualsAndHashCode.Include
+    private Integer questionId;
 
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String text;
@@ -28,29 +32,18 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Answer> answers;
-
-    // Constructors, getters, and setters
-    public Question() {}
-
-    public Question(String text, int score, Quiz quiz) {
-        this.text = text;
-        this.score = score;
-        this.quiz = quiz;
-    }
-
-    // Getters and setters
-    public int getQuestionId() { return questionId; }
-    public void setQuestionId(int questionId) { this.questionId = questionId; }
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
-    public int getScore() { return score; }
-    public void setScore(int score) { this.score = score; }
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
-    public List<Answer> getAnswers() { return answers; }
-    public void setAnswers(List<Answer> answers) { this.answers = answers; }
+    @OneToMany(
+            mappedBy = "question",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Answer> answers = new ArrayList<>();
 }
