@@ -31,10 +31,9 @@ public class TopicController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public Topic create(@RequestBody Topic topic) {
-        return topicService.create(topic);
+    public ResponseEntity<Topic> create(@RequestBody Topic topic) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(topicService.create(topic));
     }
 
     @GetMapping("/{id}")
@@ -51,15 +50,15 @@ public class TopicController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Topic update(@PathVariable Integer id, @RequestBody Topic updated) {
-        return topicService.update(updated);
+    public ResponseEntity<Topic> update(@PathVariable Integer id, @RequestBody Topic updated) {
+        return ResponseEntity.status(HttpStatus.OK).body(topicService.update(updated));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         topicService.delete(id);
+        return ResponseEntity.ok("Delete operation successful.");
     }
 
     @GetMapping("/cache")

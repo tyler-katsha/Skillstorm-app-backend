@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,19 +40,18 @@ public class AttemptController {
     // Simple endpoint using explicit relationship ids
     @PostMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public Attempt create(@RequestParam  Integer userId,
+    public ResponseEntity<Attempt> create(@RequestParam  Integer userId,
                             @RequestParam Integer quizId,
                             @RequestParam int score,
                             @RequestParam LocalDateTime time) {
-        return attemptService.create(userId, quizId, score, time);
+        return ResponseEntity.status(HttpStatus.OK).body(attemptService.create(userId, quizId, score, time));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public Attempt getById(@PathVariable Integer id) {
-        return attemptService.getById(id);
+    public ResponseEntity<Attempt> getById(@PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(attemptService.getById(id));
     }
 
     @GetMapping
@@ -67,10 +70,10 @@ public class AttemptController {
 
     @DeleteMapping("/{id}")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         attemptService.delete(id);
+        return ResponseEntity.ok("Delete operation succesful");
     }
 
     @GetMapping("/cache")

@@ -31,10 +31,9 @@ public class QuestionController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public Question create(@RequestBody Question q) {
-        return questionService.create(q);
+    public ResponseEntity<Question> create(@RequestBody Question q) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionService.create(q));
     }
 
     @GetMapping("/{id}")
@@ -58,10 +57,10 @@ public class QuestionController {
 
     @DeleteMapping("/{id}")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         questionService.delete(id);
+        return ResponseEntity.ok("Delete operation successful.");
     }
 
     @GetMapping("/cache")

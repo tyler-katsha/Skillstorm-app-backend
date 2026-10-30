@@ -28,6 +28,7 @@ public class Question {
     private String text;
 
     @Column(name = "score", nullable = false)
+    @Builder.Default
     private int score = 1;
 
     @ManyToOne(fetch = FetchType.EAGER)

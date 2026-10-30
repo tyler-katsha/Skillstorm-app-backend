@@ -68,10 +68,10 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         userService.delete(id);
+        return ResponseEntity.ok("Delete operation successful.");
     }
 
     @GetMapping("/cache")

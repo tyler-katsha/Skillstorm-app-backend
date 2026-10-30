@@ -82,7 +82,6 @@ public class QuizController {
 
     @DeleteMapping("/{id}")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try{

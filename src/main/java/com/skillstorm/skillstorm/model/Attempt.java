@@ -36,6 +36,7 @@ public class Attempt {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
+    @Builder.Default
     @Column(name = "score", nullable = false)
     private int score = 0;
 

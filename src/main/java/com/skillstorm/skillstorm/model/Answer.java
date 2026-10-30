@@ -29,6 +29,7 @@ public class Answer {
     @Column(name = "answer_text", nullable = false, columnDefinition = "TEXT")
     private String answerText;
 
+    @Builder.Default
     @Column(name = "is_correct", nullable = false)
     private boolean isCorrect = false;
 }
