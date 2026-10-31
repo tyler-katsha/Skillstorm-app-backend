@@ -1,6 +1,12 @@
 package com.skillstorm.skillstorm.service;
 
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.*;
+import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
+import com.skillstorm.skillstorm.dto.payloads.SubmissionPayload;
+import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
+import com.skillstorm.skillstorm.dto.responses.QuizAttemptResponse;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
+import com.skillstorm.skillstorm.dto.responses.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.UserMapper;
 import com.skillstorm.skillstorm.model.*;
@@ -297,7 +303,12 @@ public class UserTrackerService {
     }
 
     @Transactional
-    public void saveUncompletedQuiz(int userId, int quizId, UncompletedDto dto) {
+    public void saveUncompletedQuiz(QuizUncompletedPayload payload) {
+
+        int userId = payload.getUserId();
+        int quizId = payload.getQuizId();
+        UncompletedDto dto = payload.getUncompletedDto();
+
         if (dto == null) {
             throw new IllegalArgumentException("UncompletedDto cannot be null");
         }

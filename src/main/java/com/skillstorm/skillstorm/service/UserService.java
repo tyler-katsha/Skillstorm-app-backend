@@ -5,7 +5,13 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.hash.BloomFilter;
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.ForgotPassword;
+import com.skillstorm.skillstorm.dto.extraDtos.UncompletedDto;
+import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
+import com.skillstorm.skillstorm.dto.requests.UserLogin;
+import com.skillstorm.skillstorm.dto.requests.UserRegister;
+import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.enums.FilterType;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
@@ -162,9 +168,6 @@ public class UserService {
         return userTrackerService.history(userId);
     }
 
-    public void saveUncompletedQuiz(int userId, int quizId, UncompletedDto dto) {
-        userTrackerService.saveUncompletedQuiz(userId,quizId,dto);
-    }
 
     public void forgotPassword(ForgotPassword payload) {
 

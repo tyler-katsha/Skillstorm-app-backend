@@ -1,6 +1,6 @@
 package com.skillstorm.skillstorm.service;
 
-import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.UserMapper;
 import com.skillstorm.skillstorm.model.User;

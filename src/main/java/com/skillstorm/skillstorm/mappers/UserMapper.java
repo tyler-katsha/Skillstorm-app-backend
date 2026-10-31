@@ -1,8 +1,8 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.UserProfile;
-import com.skillstorm.skillstorm.dto.UserRegister;
-import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.extraDtos.UserProfile;
+import com.skillstorm.skillstorm.dto.requests.UserRegister;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

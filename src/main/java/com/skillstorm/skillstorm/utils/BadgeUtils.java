@@ -14,7 +14,8 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class BadgeUtils {
 
-    private static final String TOP_10 = "top-10",WEEKLY_CHAMP = "global-champ";
+    private static final String TOP_10 = "top-10";
+    private static final String GLOBAL_CHAMP = "global-champ";
 
     private final LeaderboardService leaderboardService;
 
@@ -26,7 +27,6 @@ public class BadgeUtils {
             case LEADERBOARD -> calculateLeaderboardProgress(tracker.getUser().getUserId(),badge.getDefinitionId()); // Requires separate logic to check leaderboard position
             case TOPICS -> calculateLeDistinctTopics(tracker); // Requires logic to count unique categories played
             case HIGH_SCORES -> calculateHighScores(tracker);
-            default -> 0;
         };
     }
 
@@ -62,7 +62,7 @@ public class BadgeUtils {
         if(TOP_10.equals(definitionId)) {
             boolean isTopTenPercent = leaderboardService.isUserInTop10TenPercentDynamic(userId);
             return isTopTenPercent ? 1 : 0;
-        } else if (WEEKLY_CHAMP.equals(definitionId)) {
+        } else if (GLOBAL_CHAMP.equals(definitionId)) {
             boolean isGlobalChampion = leaderboardService.isGlobalChampion(userId);
             return isGlobalChampion ? 1 : 0;
         }

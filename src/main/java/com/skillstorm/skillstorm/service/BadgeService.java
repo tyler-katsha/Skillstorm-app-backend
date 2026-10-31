@@ -1,12 +1,10 @@
 package com.skillstorm.skillstorm.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.skillstorm.skillstorm.dto.BadgeRequest;
-import com.skillstorm.skillstorm.dto.BadgeResponse;
-import com.skillstorm.skillstorm.dto.SmallBadgeResponse;
+import com.skillstorm.skillstorm.dto.requests.BadgeRequest;
+import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
+import com.skillstorm.skillstorm.dto.responses.SmallBadgeResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.BadgeMapper;
 import com.skillstorm.skillstorm.model.UserBadge;

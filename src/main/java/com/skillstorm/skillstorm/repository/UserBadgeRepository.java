@@ -1,6 +1,6 @@
 package com.skillstorm.skillstorm.repository;
 
-import com.skillstorm.skillstorm.dto.BadgeResponse;
+import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
 import com.skillstorm.skillstorm.model.Badge;
 import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.model.UserBadge;
@@ -18,7 +18,7 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge,Integer> {
     List<UserBadge> findByUser(User user);
 
     @Query("""
-           SELECT new com.skillstorm.skillstorm.dto.BadgeResponse(
+           SELECT new com.skillstorm.skillstorm.dto.responses.BadgeResponse(
                 b.id,b.definitionId, b.title,b.description, b.icon, b.kind,
                 b.goal, ub.currentProgress, ub.isEarned, ub.earnedAt
            ) FROM UserBadge ub

@@ -1,9 +1,9 @@
 package com.skillstorm.skillstorm.controller;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.HomeSection;
-import com.skillstorm.skillstorm.dto.SmallBadgeResponse;
-import com.skillstorm.skillstorm.dto.SmallQuizResponse;
+import com.skillstorm.skillstorm.dto.extraDtos.HomeSection;
+import com.skillstorm.skillstorm.dto.responses.SmallBadgeResponse;
+import com.skillstorm.skillstorm.dto.responses.SmallQuizResponse;
 import com.skillstorm.skillstorm.service.BadgeService;
 import com.skillstorm.skillstorm.service.TopicService;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +33,7 @@ public class HomeController {
 
         try {
             List<SmallBadgeResponse> badgeSection = badgeService.findBadgesToDisplay();
-
-            System.out.println("Badge Section -> ");
-            System.out.println(badgeSection);
             List<SmallQuizResponse> quizSection =  topicService.findTopTopicsWithQuizCountAndDifficulty();
-
-            System.out.println("Quiz Section -> ");
-            System.out.println(quizSection);
 
             HomeSection sections = HomeSection.builder()
                     .badgeSection(badgeSection)
@@ -48,7 +42,6 @@ public class HomeController {
 
             return ResponseEntity.ok(sections);
         } catch(Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

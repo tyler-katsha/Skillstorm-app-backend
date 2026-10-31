@@ -1,7 +1,7 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.BadgeRequest;
-import com.skillstorm.skillstorm.dto.BadgeResponse;
+import com.skillstorm.skillstorm.dto.requests.BadgeRequest;
+import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
 import com.skillstorm.skillstorm.model.Badge;
 import com.skillstorm.skillstorm.model.UserBadge;
 import org.springframework.stereotype.Component;
@@ -39,13 +39,5 @@ public class BadgeMapperImpl implements BadgeMapper{
     @Override
     public BadgeResponse mapToBadgeResponse(UserBadge userBadge) {
         return null;
-    }
-
-    @Override
-    public List<BadgeResponse> mapToBadgeResponses(List<Badge> badges) {
-        return badges.stream()
-                .map(this::mapToBadgeResponse)
-                .toList();
-
     }
 }

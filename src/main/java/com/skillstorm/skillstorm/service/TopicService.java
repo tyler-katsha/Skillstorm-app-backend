@@ -2,7 +2,7 @@ package com.skillstorm.skillstorm.service;
 
 import java.util.List;
 
-import com.skillstorm.skillstorm.dto.SmallQuizResponse;
+import com.skillstorm.skillstorm.dto.responses.SmallQuizResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;

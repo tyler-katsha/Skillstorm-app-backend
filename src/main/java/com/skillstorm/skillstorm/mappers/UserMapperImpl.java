@@ -1,6 +1,8 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.UserProfile;
+import com.skillstorm.skillstorm.dto.requests.UserRegister;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.User;
 import org.springframework.stereotype.Component;

@@ -3,13 +3,16 @@ package com.skillstorm.skillstorm.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.SubmissionResultDto;
+import com.skillstorm.skillstorm.dto.payloads.QuizCreatePayload;
+import com.skillstorm.skillstorm.dto.payloads.QuizUpdatePayload;
+import com.skillstorm.skillstorm.dto.payloads.SubmissionPayload;
+import com.skillstorm.skillstorm.dto.records.QuizDTO;
 import com.skillstorm.skillstorm.enums.Difficulty;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.QuestionMapper;
 import com.skillstorm.skillstorm.mappers.QuizMapper;
 import com.skillstorm.skillstorm.model.*;
-import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -91,17 +94,19 @@ public class QuizService {
             @CacheEvict(cacheNames = "quiz", key = "'all'")
     })
     @Transactional
-    public void update(Integer id, UpdateQuizRequest quiz, String email) {
-        Quiz existingQuiz = quizRepository.findById(id)
+    public void update(QuizUpdatePayload payload) {
+        Quiz existingQuiz = quizRepository.findById(payload.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz doesn't exist"));
 
-        Difficulty difficulty = Difficulty.valueOf(quiz.getDifficulty().toUpperCase());
-        existingQuiz.setTitle(quiz.getTitle());
+        String email = payload.getPrincipal().getEmail();
+
+        Difficulty difficulty = Difficulty.valueOf(payload.getRequest().getDifficulty().toUpperCase());
+        existingQuiz.setTitle(payload.getRequest().getTitle());
         existingQuiz.setDifficulty(difficulty);
         existingQuiz.setEmail(email);
 
-        if (quiz.getTopics() != null) {
-            List<Topic> updatedTopics = quiz.getTopics().stream()
+        if (payload.getRequest().getTopics() != null) {
+            List<Topic> updatedTopics = payload.getRequest().getTopics().stream()
                     .filter(name -> name != null && !name.trim().isEmpty())
                     .map(topicService::findOrCreate)
                     .toList();
@@ -110,10 +115,10 @@ public class QuizService {
             existingQuiz.getTopics().addAll(updatedTopics);
         }
 
-        if (quiz.getQuestions() != null) {
+        if (payload.getRequest().getQuestions() != null) {
             List<Question> updatedQuestions = new ArrayList<>();
 
-            for (Question incomingQuestion : quiz.getQuestions()) {
+            for (Question incomingQuestion : payload.getRequest().getQuestions()) {
                 if (incomingQuestion.getQuestionId() != null) {
                     Question existingQuestion = existingQuiz.getQuestions()
                             .stream()
@@ -161,7 +166,6 @@ public class QuizService {
 
     @Transactional
     public SubmissionResultDto submit(int id, SubmissionPayload payload, int userId) {
-        System.out.println("id: " + id + "payload: " + payload + "userID: " + userId);
         return userTrackerService.submit(id,payload,userId);
     }
 

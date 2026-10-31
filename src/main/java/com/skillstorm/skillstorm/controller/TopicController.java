@@ -66,7 +66,7 @@ public class TopicController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("topic");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("topic");
+        return ResponseEntity.ok(result + "\nCache was checked");
     }
 }

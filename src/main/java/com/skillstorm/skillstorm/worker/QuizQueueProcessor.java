@@ -1,6 +1,6 @@
 package com.skillstorm.skillstorm.worker;
 
-import com.skillstorm.skillstorm.dto.QuizCreatePayload;
+import com.skillstorm.skillstorm.dto.payloads.QuizCreatePayload;
 import org.springframework.stereotype.Component;
 
 @Component

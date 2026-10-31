@@ -4,12 +4,14 @@ import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import com.skillstorm.skillstorm.service.UserBadgeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class BadgeInitializationWorker implements BackgroundWorker<Integer>{
 
     private final UserRepository userRepository;
@@ -30,6 +32,6 @@ public class BadgeInitializationWorker implements BackgroundWorker<Integer>{
             pageNumber++;
         } while(userPage.hasNext());
 
-        System.out.println("Background worker finished initializing badge for all users.");
+        log.info("Background worker finished initializing badge for all users.");
     }
 }

@@ -4,14 +4,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.BadgeRequest;
-import com.skillstorm.skillstorm.dto.BadgeResponse;
+import com.skillstorm.skillstorm.dto.requests.BadgeRequest;
+import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
-import com.skillstorm.skillstorm.repository.UserBadgeRepository;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
-import com.skillstorm.skillstorm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +33,6 @@ import com.skillstorm.skillstorm.service.BadgeService;
 public class BadgeController {
 
     private final BadgeService badgeService;
-    private final UserService userService;
-    private final UserBadgeRepository userBadgeRepository;
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
@@ -67,11 +62,7 @@ public class BadgeController {
     public ResponseEntity<?> findBadgeByUser(@AuthenticationPrincipal UserPrincipal principal) {
 
         try {
-            User user = userService.findByEmail(principal.getEmail());
-
-            List<BadgeResponse> badges = userBadgeRepository.findAllBadgesForUser(user.getUserId());
-            return ResponseEntity.ok(badges);
-
+            return ResponseEntity.ok(badgeService.findBadgesByUser(principal.getUserId()));
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -105,8 +96,8 @@ public class BadgeController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("badge");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("badge");
+        return ResponseEntity.ok(result + "\nCache was checked");
     }
 
     @PostMapping("/batch")

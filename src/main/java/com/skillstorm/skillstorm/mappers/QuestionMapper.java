@@ -1,7 +1,7 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.CreateQuestionRequest;
-import com.skillstorm.skillstorm.dto.QuestionResponse;
+import com.skillstorm.skillstorm.dto.requests.CreateQuestionRequest;
+import com.skillstorm.skillstorm.dto.responses.QuestionResponse;
 import com.skillstorm.skillstorm.model.Question;
 import org.mapstruct.Mapper;
 
