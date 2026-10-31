@@ -9,6 +9,7 @@ import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.model.Question;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import com.skillstorm.skillstorm.worker.QuizQueueProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class QuizController {
 
     private final QuizService quizService;
     private final InspectionCacheService inspectionCacheService;
+    private final QuizQueueProcessor quizQueueProcessor;
 
     @PostMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
@@ -41,9 +43,14 @@ public class QuizController {
     public ResponseEntity<Quiz> create(@RequestBody CreateQuizRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try{
 
+            QuizCreatePayload payload = QuizCreatePayload.builder()
+                    .request(request)
+                    .principal(principal)
+                    .build();
+
+            quizQueueProcessor.enqueue(payload);
             return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(quizService.create(request,principal));
+                    .status(HttpStatus.CREATED).build();
 
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

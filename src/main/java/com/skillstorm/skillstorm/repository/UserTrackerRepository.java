@@ -6,10 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserTrackerRepository extends JpaRepository<UserTracker,Integer> {
     @Query("SELECT ut FROM UserTracker ut WHERE ut.user.userId = :userId")
     Optional<UserTracker> findByUserId(@Param("userId") Integer userId);
+    @Query("SELECT ut FROM UserTracker ut WHERE ut.overallStats.lastActivityDate >= :sinceDate")
+    List<UserTracker> findUsersActiveSince(@Param("sinceDate") LocalDate sinceDate);
 }

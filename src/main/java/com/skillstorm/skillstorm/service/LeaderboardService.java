@@ -43,4 +43,12 @@ public class LeaderboardService {
     public void evictLeaderboardCache() {
         log.info("Leaderboard cache manually evicted.");
     }
+
+    public boolean isUserInTop10TenPercentDynamic(Integer userId) {
+        return leaderboardRepository.isUserInTop10TenPercentDynamic(userId);
+    }
+
+    public boolean isGlobalChampion(Integer userId) {
+        return leaderboardRepository.isGlobalChampion(userId);
+    }
 }

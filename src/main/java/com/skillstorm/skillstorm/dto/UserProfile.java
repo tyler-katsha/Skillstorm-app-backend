@@ -19,5 +19,5 @@ public class UserProfile {
     private String email;
     private Integer level;
     private Integer xp;
-    private Set<Role> role;
+    private Set<Role> roles;
 }

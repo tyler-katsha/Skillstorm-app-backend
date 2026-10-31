@@ -1,10 +1,9 @@
 package com.skillstorm.skillstorm.service;
 
 import java.util.List;
-import java.util.Optional;
 
+import com.skillstorm.skillstorm.dto.SmallQuizResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -62,6 +61,10 @@ public class TopicService {
     })
     public void delete(int topicId) {
         topicRepository.deleteById(topicId);
+    }
+
+    public List<SmallQuizResponse> findTopTopicsWithQuizCountAndDifficulty() {
+        return topicRepository.findTopTopicsWithQuizCountAndDifficulty();
     }
 
 

@@ -97,19 +97,18 @@ public class UserService {
     }
 
     @Cacheable(cacheNames = "emailUsers",key="#email")
-    public UserDTO findByEmail(String email) {
-        User existingUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+    public User findByEmail(String email) {
 
-        return userMapper.mapToDto(existingUser);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
     }
 
     @Cacheable(cacheNames = "user",key="'all'")
-    public List<UserDTO> getAll() {
+    public List<UserResponse> getAll() {
         return userRepository
             .findAll()
             .stream()
-            .map(userMapper::mapToDto)
+            .map(userMapper::mapToResponse)
             .toList();
     }
 

@@ -23,7 +23,6 @@ public class UserResponse {
     private Integer xp;
     private Integer level;
     private List<Attempt> attempts;
-    private List<Badge> badges;
     private String createdAt;
 
 }

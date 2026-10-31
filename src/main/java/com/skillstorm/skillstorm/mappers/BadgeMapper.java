@@ -1,13 +1,20 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.BadgeDTO;
+import com.skillstorm.skillstorm.dto.BadgeRequest;
+import com.skillstorm.skillstorm.dto.BadgeResponse;
 import com.skillstorm.skillstorm.model.Badge;
+import com.skillstorm.skillstorm.model.UserBadge;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-import java.util.Set;
 
-@Mapper(componentModel="spring")
+@Mapper(componentModel="spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BadgeMapper {
-    List<BadgeDTO> mapToDto(List<Badge> badges);
+
+    Badge toBadge(BadgeRequest request);
+    BadgeResponse mapToBadgeResponse(Badge badge);
+    BadgeResponse mapToBadgeResponse(UserBadge userBadge);
+    List<BadgeResponse> mapToBadgeResponses(List<Badge> badges);
 }

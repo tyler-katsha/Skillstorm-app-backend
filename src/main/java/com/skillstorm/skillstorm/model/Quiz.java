@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.model;
 
 import java.util.*;
 
+import com.skillstorm.skillstorm.enums.Difficulty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,8 @@ public class Quiz {
     private String title;
 
     @Column(name = "difficulty", nullable = false)
-    private String difficulty; // "Easy", "Medium", "Hard"
+    @Enumerated(EnumType.STRING)
+    private Difficulty difficulty; // "EASY", "MEDIUM", "HARD"
 
     @ManyToMany
     @JoinTable(

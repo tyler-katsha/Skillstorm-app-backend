@@ -55,7 +55,7 @@ public class UserController {
     @GetMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> getAll() {
+    public List<UserResponse> getAll() {
         return userService.getAll();
     }
 
