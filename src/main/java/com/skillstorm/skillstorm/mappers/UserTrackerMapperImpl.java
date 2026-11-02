@@ -1,6 +1,10 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.QuizSummaryDto;
+import com.skillstorm.skillstorm.dto.requests.UserTrackerRequest;
+import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
+import com.skillstorm.skillstorm.dto.responses.QuizAttemptResponse;
+import com.skillstorm.skillstorm.dto.responses.UserTrackerResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.QuizRepository;

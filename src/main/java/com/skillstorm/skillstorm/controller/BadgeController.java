@@ -4,7 +4,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.BadgeDTO;
+import com.skillstorm.skillstorm.dto.requests.BadgeRequest;
+import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,10 +38,10 @@ public class BadgeController {
     @PostMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
-    public ResponseEntity<?> create(@RequestBody BadgeDTO dto, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<?> create(@RequestBody BadgeRequest request) {
         try{
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(badgeService.create(dto, principal.getUserId()));
+            badgeService.create(request);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -49,22 +49,31 @@ public class BadgeController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public Badge getById(@PathVariable Integer id) {
-        return badgeService.getById(id);
+    public List<BadgeResponse> getAll() {
+        return badgeService.getAll();
     }
 
-    @GetMapping
+    @GetMapping("/user")
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public List<Badge> getAll() {
-        return badgeService.getAll();
+    public ResponseEntity<?> findBadgeByUser(@AuthenticationPrincipal UserPrincipal principal) {
+
+        try {
+            return ResponseEntity.ok(badgeService.findBadgesByUser(principal.getUserId()));
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
-    public Badge update(@PathVariable Integer id, @RequestBody Badge updated) {
+    public Badge update(@PathVariable Integer id, @RequestBody BadgeRequest updated) {
         return badgeService.update(id, updated);
     }
 
@@ -86,7 +95,28 @@ public class BadgeController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("badge");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("badge");
+        return ResponseEntity.ok(result + "\nCache was checked");
+    }
+
+    @PostMapping("/batch")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
+    public ResponseEntity<String> batchAdd(@RequestBody List<BadgeRequest> requests) {
+        try{
+            badgeService.batchAdd(requests);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/next")
+    @RateLimited(capacity = 20, tokens = 20, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<BadgeResponse> findNextBadgeToUnlock(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(badgeService.findNextBadgeToUnlock(principal.getUserId()));
     }
 }

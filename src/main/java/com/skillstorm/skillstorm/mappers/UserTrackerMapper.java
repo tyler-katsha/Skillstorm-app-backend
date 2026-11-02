@@ -1,19 +1,13 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.ProfileTrackerAPIResponse;
-import com.skillstorm.skillstorm.dto.QuizAttemptResponse;
-import com.skillstorm.skillstorm.dto.UserTrackerRequest;
-import com.skillstorm.skillstorm.dto.UserTrackerResponse;
-import com.skillstorm.skillstorm.model.Quiz;
+import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
+import com.skillstorm.skillstorm.dto.responses.QuizAttemptResponse;
+import com.skillstorm.skillstorm.dto.requests.UserTrackerRequest;
+import com.skillstorm.skillstorm.dto.responses.UserTrackerResponse;
 import com.skillstorm.skillstorm.model.QuizAttemptRecord;
 import com.skillstorm.skillstorm.model.UserTracker;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper
 public interface UserTrackerMapper {

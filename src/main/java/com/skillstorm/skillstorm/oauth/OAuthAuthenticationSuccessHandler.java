@@ -64,7 +64,6 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
                                     .email(email)
                                     .createdAt(LocalDateTime.now())
                                     .attempts(List.of())
-                                    .badges(List.of())
                                     .build());
                 });
 

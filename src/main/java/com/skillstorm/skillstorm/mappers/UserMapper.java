@@ -1,9 +1,8 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.UserDTO;
-import com.skillstorm.skillstorm.dto.UserProfile;
-import com.skillstorm.skillstorm.dto.UserRegister;
-import com.skillstorm.skillstorm.dto.UserResponse;
+import com.skillstorm.skillstorm.dto.extraDtos.UserProfile;
+import com.skillstorm.skillstorm.dto.requests.UserRegister;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,7 +14,6 @@ public interface UserMapper {
     @Mapping(target = "roles",constant = "ROLE_USER")
     User toUser(UserRegister request);
 
-    UserDTO mapToDto(User user);
     UserProfile mapToProfile(User user);
     UserResponse mapToResponse(User user);
 }

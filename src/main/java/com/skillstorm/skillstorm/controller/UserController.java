@@ -4,17 +4,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.UncompletedDto;
+import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
+import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
+import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import com.skillstorm.skillstorm.worker.QuizUncompletedQueueProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,13 +38,12 @@ public class UserController {
 
     private final UserService userService;
     private final InspectionCacheService inspectionCacheService;
-
+    private final QuizUncompletedQueueProcessor uncompletedQueueProcessor;
     // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
     @RateLimited(capacity = 30,tokens = 30,duration = 10,unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<UserResponse> getLoggedInUser(@AuthenticationPrincipal UserPrincipal principal) {
-        // TODO: Get user ID from request header
         return ResponseEntity.ok(userService.getById(principal.getUserId()));
     }
 
@@ -55,7 +57,7 @@ public class UserController {
     @GetMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> getAll() {
+    public List<UserResponse> getAll() {
         return userService.getAll();
     }
 
@@ -78,8 +80,8 @@ public class UserController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("user");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("user");
+        return ResponseEntity.ok(result + "\nCache was checked");
     }
 
     @GetMapping("/history")
@@ -100,9 +102,17 @@ public class UserController {
     @PostMapping("/uncompleted/{quizId}")
     @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId,@RequestBody UncompletedDto dto,@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId, @RequestBody UncompletedDto dto, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            userService.saveUncompletedQuiz(principal.getUserId(),quizId,dto);
+
+            QuizUncompletedPayload payload = QuizUncompletedPayload.builder()
+                    .uncompletedDto(dto)
+                    .quizId(quizId)
+                    .userId(principal.getUserId())
+                    .build();
+
+            uncompletedQueueProcessor.enqueue(payload);
+
             return ResponseEntity.ok().build();
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

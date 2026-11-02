@@ -1,8 +1,8 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.CreateQuizRequest;
-import com.skillstorm.skillstorm.dto.QuizDTO;
-import com.skillstorm.skillstorm.dto.QuizSummaryDto;
+import com.skillstorm.skillstorm.dto.requests.CreateQuizRequest;
+import com.skillstorm.skillstorm.dto.records.QuizDTO;
+import com.skillstorm.skillstorm.dto.extraDtos.QuizSummaryDto;
 import com.skillstorm.skillstorm.model.Quiz;
 
 import java.util.List;

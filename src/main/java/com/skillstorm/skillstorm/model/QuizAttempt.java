@@ -2,10 +2,7 @@ package com.skillstorm.skillstorm.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,10 +12,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "quiz_attempts")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"user","quiz"})
+@ToString(exclude = {"user","quiz"})
 public class QuizAttempt {
 
     @Id

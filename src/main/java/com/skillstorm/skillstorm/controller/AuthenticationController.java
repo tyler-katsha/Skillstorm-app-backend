@@ -1,10 +1,10 @@
 package com.skillstorm.skillstorm.controller;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.BloomUser;
-import com.skillstorm.skillstorm.dto.ForgotPassword;
-import com.skillstorm.skillstorm.dto.UserLogin;
-import com.skillstorm.skillstorm.dto.UserRegister;
+import com.skillstorm.skillstorm.dto.extraDtos.BloomUser;
+import com.skillstorm.skillstorm.dto.extraDtos.ForgotPassword;
+import com.skillstorm.skillstorm.dto.requests.UserLogin;
+import com.skillstorm.skillstorm.dto.requests.UserRegister;
 import com.skillstorm.skillstorm.enums.FilterType;
 import com.skillstorm.skillstorm.exceptions.AuthorizationException;
 import com.skillstorm.skillstorm.exceptions.InvalidEmailException;

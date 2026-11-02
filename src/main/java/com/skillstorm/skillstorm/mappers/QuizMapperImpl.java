@@ -1,16 +1,15 @@
 package com.skillstorm.skillstorm.mappers;
 
-import com.skillstorm.skillstorm.dto.CreateQuizRequest;
-import com.skillstorm.skillstorm.dto.QuizDTO;
-import com.skillstorm.skillstorm.dto.QuizSummaryDto;
+import com.skillstorm.skillstorm.dto.requests.CreateQuizRequest;
+import com.skillstorm.skillstorm.dto.records.QuizDTO;
+import com.skillstorm.skillstorm.dto.extraDtos.QuizSummaryDto;
+import com.skillstorm.skillstorm.enums.Difficulty;
 import com.skillstorm.skillstorm.model.Quiz;
 import com.skillstorm.skillstorm.model.Topic;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class QuizMapperImpl implements QuizMapper {
@@ -30,12 +29,7 @@ public class QuizMapperImpl implements QuizMapper {
 
         List<String> topicNames = getTopicsByName(quiz.getTopics());
 
-        return new QuizDTO(
-                quiz.getQuizId(),
-                quiz.getTitle(),
-                quiz.getDifficulty(),
-                topicNames,
-                questionMapper.mapToDto(quiz.getQuestions()));
+        return new QuizDTO(quiz.getQuizId(), quiz.getTitle(), quiz.getDifficulty(), topicNames, questionMapper.mapToDto(quiz.getQuestions()));
     }
 
     @Override
@@ -45,9 +39,10 @@ public class QuizMapperImpl implements QuizMapper {
             return null;
         }
 
+        Difficulty difficulty = Difficulty.valueOf(request.getDifficulty().toUpperCase());
         return Quiz.builder()
                 .title(request.getTitle())
-                .difficulty(request.getDifficulty())
+                .difficulty(difficulty)
                 .build();
     }
 

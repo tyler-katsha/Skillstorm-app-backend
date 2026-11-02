@@ -4,11 +4,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
-import com.skillstorm.skillstorm.dto.*;
+import com.skillstorm.skillstorm.dto.extraDtos.SubmissionResultDto;
+import com.skillstorm.skillstorm.dto.payloads.QuizCreatePayload;
+import com.skillstorm.skillstorm.dto.payloads.QuizUpdatePayload;
+import com.skillstorm.skillstorm.dto.payloads.SubmissionPayload;
+import com.skillstorm.skillstorm.dto.records.QuizDTO;
+import com.skillstorm.skillstorm.dto.requests.CreateQuizRequest;
+import com.skillstorm.skillstorm.dto.requests.UpdateQuizRequest;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.model.Question;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
+import com.skillstorm.skillstorm.worker.QuizQueueProcessor;
+import com.skillstorm.skillstorm.worker.QuizUpdateQueueProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +41,8 @@ public class QuizController {
 
     private final QuizService quizService;
     private final InspectionCacheService inspectionCacheService;
+    private final QuizQueueProcessor quizQueueProcessor;
+    private final QuizUpdateQueueProcessor quizUpdateQueueProcessor;
 
     @PostMapping
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
@@ -41,9 +50,36 @@ public class QuizController {
     public ResponseEntity<Quiz> create(@RequestBody CreateQuizRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try{
 
+            QuizCreatePayload payload = QuizCreatePayload.builder()
+                    .request(request)
+                    .principal(principal)
+                    .build();
+
+            quizQueueProcessor.enqueue(payload);
             return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(quizService.create(request,principal));
+                    .status(HttpStatus.CREATED).build();
+
+        } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/batch")
+    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<Void> batchCreate(@RequestBody List<CreateQuizRequest> requests, @AuthenticationPrincipal UserPrincipal principal) {
+        try{
+
+            for (CreateQuizRequest request: requests) {
+                QuizCreatePayload payload = QuizCreatePayload.builder()
+                        .request(request)
+                        .principal(principal)
+                        .build();
+
+                quizQueueProcessor.enqueue(payload);
+            }
+            return ResponseEntity
+                    .status(HttpStatus.CREATED).build();
 
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -70,8 +106,16 @@ public class QuizController {
     public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody UpdateQuizRequest updatedQuiz, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
 
-            quizService.update(id,updatedQuiz,userPrincipal.getEmail());
-            return ResponseEntity.ok().build();
+            QuizUpdatePayload payload = QuizUpdatePayload.builder()
+                    .id(id)
+                    .request(updatedQuiz)
+                    .principal(userPrincipal)
+                    .build();
+
+            quizUpdateQueueProcessor.enqueue(payload);
+
+            return ResponseEntity.ok()
+                    .build();
 
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -96,8 +140,8 @@ public class QuizController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        inspectionCacheService.inspectCache("quiz");
-        return ResponseEntity.ok("Cache was checked");
+        var result = inspectionCacheService.inspectCache("quiz");
+        return ResponseEntity.ok(result + "\nCache was checked");
     }
 
 
@@ -107,8 +151,7 @@ public class QuizController {
     public ResponseEntity<SubmissionResultDto> submit(@PathVariable int id, @RequestBody SubmissionPayload payload, @AuthenticationPrincipal UserPrincipal principal) {
         try {
 
-            var res = quizService.submit(id,payload,principal.getUserId());
-            return ResponseEntity.ok(res);
+            return ResponseEntity.ok(quizService.submit(id,payload,principal.getUserId()));
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch(Exception e) {
