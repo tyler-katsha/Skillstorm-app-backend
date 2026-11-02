@@ -41,6 +41,7 @@ public class UserService {
     private final BloomFilter<String> emailFilter;
     private final UserTrackerService userTrackerService;
     private final EmailService emailService;
+    private final UserBadgeService userBadgeService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -70,10 +71,12 @@ public class UserService {
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         usernameFilter.put(user.getUsername());
         emailFilter.put(user.getEmail());
+
+        userBadgeService.initializeBadgesForUser(savedUser);
 
         return "Account created Successfully";
     }

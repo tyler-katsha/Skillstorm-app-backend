@@ -38,6 +38,9 @@ public class BadgeMapperImpl implements BadgeMapper{
 
     @Override
     public BadgeResponse mapToBadgeResponse(UserBadge userBadge) {
-        return null;
+
+        Badge badge = userBadge.getBadge();
+
+        return mapToBadgeResponse(badge );
     }
 }

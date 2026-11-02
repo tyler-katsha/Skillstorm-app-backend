@@ -25,7 +25,7 @@ public class LeaderboardSchedule {
 
     @CacheEvict(value = "top10Leaderboard", allEntries = true)
     @Transactional
-    @Scheduled(cron = " 0 */5 * * * *") // Schedules an update every 5 minutes
+    @Scheduled(cron = " 0 */1 * * * *") // Schedules an update every 5 minutes
     public void updateLeaderboard(){
 
         log.trace("Executing Global Leaderboard updates....");

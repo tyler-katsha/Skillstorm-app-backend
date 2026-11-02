@@ -97,6 +97,7 @@ public class UserTrackerService {
             UserTracker tracker = getOrCreateTracker(user);
 
             UserOverallStats stats = tracker.getOverallStats();
+
             if (stats == null) {
                 stats = new UserOverallStats();
             }
@@ -325,11 +326,11 @@ public class UserTrackerService {
 
         Set<Quiz> quizzes = new HashSet<>();
 
-        quizzes.add(dto.getQuiz());
+        quizzes.add(quiz);
         maps.putIfAbsent(userId,quizzes);
 
         if(maps.containsKey(userId)) {
-            maps.get(userId).add(dto.getQuiz());
+            maps.get(userId).add(quiz);
         }
         userTrackerRepository.saveAndFlush(tracker);
     }
