@@ -12,5 +12,4 @@ public interface QuestionMapper {
     QuestionResponse toDto(Question question);
     List<QuestionResponse> mapToDto(List<Question> questions);
     Question toQuestion(CreateQuestionRequest request);
-    List<Question> toQuestion(List<CreateQuestionRequest> questions);
 }

@@ -10,10 +10,6 @@ import java.util.List;
 public interface QuizMapper {
 
     QuizDTO mapToDto(Quiz quiz);
-
     QuizSummaryDto mapToSummaryDto(Quiz quiz);
-
-    List<QuizSummaryDto> mapToSummaryDto(List<Quiz> quizzes);
-
     Quiz toQuiz(CreateQuizRequest request);
 }

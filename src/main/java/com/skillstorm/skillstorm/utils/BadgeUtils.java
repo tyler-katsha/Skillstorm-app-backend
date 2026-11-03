@@ -14,8 +14,8 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class BadgeUtils {
 
-    private static final String TOP_10 = "top-10";
-    private static final String GLOBAL_CHAMP = "global-champ";
+    private static final String TOP_10 = "leaderboard_10";
+    private static final String GLOBAL_CHAMP = "leaderboard_1";
 
     private final LeaderboardService leaderboardService;
 

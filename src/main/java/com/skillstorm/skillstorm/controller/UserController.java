@@ -94,6 +94,7 @@ public class UserController {
         } catch(RateLimitExceededException e) {
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         }catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

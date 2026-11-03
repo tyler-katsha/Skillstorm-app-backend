@@ -62,19 +62,8 @@ public class QuestionMapperImpl implements QuestionMapper {
         return Question.builder()
                 .text(request.getText())
                 .score(1)
+                .description(request.getDescription())
                 .build();
-    }
-
-    @Override
-    public List<Question> toQuestion(List<CreateQuestionRequest> questions) {
-
-        if (questions == null || questions.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return questions.stream()
-                .map(this::toQuestion)
-                .toList();
     }
 
     private AnswerResponse mapAnswer(Answer answer) {

@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.skillstorm.skillstorm.model.User;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -14,8 +15,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
+    @Modifying
     @Query("SELECT user.username FROM User user")
     List<String> findAllUsername();
+    @Modifying
     @Query("SELECT user.email FROM User user")
     List<String> findAllEmail();
 

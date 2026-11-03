@@ -42,6 +42,7 @@ public class UserService {
     private final UserTrackerService userTrackerService;
     private final EmailService emailService;
     private final UserBadgeService userBadgeService;
+    private final LeaderboardService leaderboardService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -57,25 +58,33 @@ public class UserService {
 
     public String register(UserRegister request) {
 
+        // evicts the leaderboard from cache once a new user registers
+        leaderboardService.evictLeaderboardCache();
+
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         if(existingUser.isPresent()){
-            throw new AuthorizationException(String.format("Existing user with email: %s already exist",request.getEmail()));
+            var error = String.format("Existing user with email: %s already exist",request.getEmail());
+            throw new AuthorizationException(error);
         }
 
         User user = userMapper.toUser(request);
 
         if(isUsernameTaken(user.getUsername())){
-            throw new UsernameTakenException(user.getUsername() + " already exist");
+            var error = String.format("%s already exist",user.getUsername());
+            throw new UsernameTakenException(error);
         }
+
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User savedUser = userRepository.save(user);
 
+        // adds new user's details to each bloom filter (for username and email)
         usernameFilter.put(user.getUsername());
         emailFilter.put(user.getEmail());
 
+        // creates locked badges and adds it to the user_badge table in the source of truth
         userBadgeService.initializeBadgesForUser(savedUser);
 
         return "Account created Successfully";

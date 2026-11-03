@@ -30,6 +30,9 @@ public class Question {
     @Column(name = "score", nullable = false)
     private int score = 1;
 
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)
     @ToString.Exclude

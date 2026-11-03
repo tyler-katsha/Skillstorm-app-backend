@@ -100,7 +100,7 @@ public class QuizController {
     }
 
     @GetMapping
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<QuizDTO> getAll() {
         return quizService.getAll();

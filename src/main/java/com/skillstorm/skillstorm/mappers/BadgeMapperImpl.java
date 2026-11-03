@@ -41,6 +41,17 @@ public class BadgeMapperImpl implements BadgeMapper{
 
         Badge badge = userBadge.getBadge();
 
-        return mapToBadgeResponse(badge );
+        return BadgeResponse.builder()
+                .id(userBadge.getId())
+                .definitionId(badge.getDefinitionId())
+                .title(badge.getTitle())
+                .description(badge.getDescription())
+                .icon(badge.getIcon())
+                .kind(badge.getKind())
+                .goal(badge.getGoal())
+                .currentProgress(userBadge.getCurrentProgress())
+                .isEarned(userBadge.isEarned())
+                .earnedAt(userBadge.getEarnedAt())
+                .build();
     }
 }
