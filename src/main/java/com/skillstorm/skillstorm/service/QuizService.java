@@ -8,11 +8,13 @@ import com.skillstorm.skillstorm.dto.payloads.QuizCreatePayload;
 import com.skillstorm.skillstorm.dto.payloads.QuizUpdatePayload;
 import com.skillstorm.skillstorm.dto.payloads.SubmissionPayload;
 import com.skillstorm.skillstorm.dto.records.QuizDTO;
+import com.skillstorm.skillstorm.dto.requests.UpdateQuestionRequest;
 import com.skillstorm.skillstorm.enums.Difficulty;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.mappers.QuestionMapper;
 import com.skillstorm.skillstorm.mappers.QuizMapper;
 import com.skillstorm.skillstorm.model.*;
+import com.skillstorm.skillstorm.repository.QuestionRepository;
 import com.skillstorm.skillstorm.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,6 +31,7 @@ public class QuizService {
     private final QuestionMapper questionMapper;
     private final TopicService topicService;
     private final UserTrackerService userTrackerService;
+    private final QuestionRepository questionRepository;
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "quiz", key = "#result.quizId"),
@@ -118,33 +121,42 @@ public class QuizService {
         if (payload.getRequest().getQuestions() != null) {
             List<Question> updatedQuestions = new ArrayList<>();
 
-            for (Question incomingQuestion : payload.getRequest().getQuestions()) {
-                if (incomingQuestion.getQuestionId() != null) {
+            for (UpdateQuestionRequest incomingQuestion : payload.getRequest().getQuestions()) {
+
+                if (incomingQuestion.getId() != null) {
+                    // UPDATE EXISTING QUESTION
                     Question existingQuestion = existingQuiz.getQuestions()
                             .stream()
-                            .filter(q -> q.getQuestionId().equals(incomingQuestion.getQuestionId()))
+                            .filter(q -> q.getQuestionId().equals(incomingQuestion.getId()))
                             .findFirst()
-                            .orElse(null);
+                            .orElseThrow(() -> new ResourceNotFoundException("Question with id: " + incomingQuestion.getId() + " doesn't exist in this quiz"));
 
-                    if (existingQuestion != null) {
-                        existingQuestion.setText(incomingQuestion.getText());
+                    existingQuestion.setText(incomingQuestion.getText());
+                    existingQuestion.setDescription(incomingQuestion.getDescription());
+
+                    // Safely apply score with a fallback
+                    if (incomingQuestion.getScore() != null) {
                         existingQuestion.setScore(incomingQuestion.getScore());
-                        mergeAnswers(existingQuestion, incomingQuestion.getAnswers());
-                        updatedQuestions.add(existingQuestion);
-                        continue;
                     }
-                }
 
-                incomingQuestion.setQuestionId(null);
-                incomingQuestion.setQuiz(existingQuiz);
+                    // Handle mapping the options to Answer entities
+                    mergeAnswers(existingQuestion, incomingQuestion.getOptions(), incomingQuestion.getCorrectOption());
 
-                if (incomingQuestion.getAnswers() != null) {
-                    for (Answer a : incomingQuestion.getAnswers()) {
-                        a.setAnswerId(null);
-                        a.setQuestion(incomingQuestion);
-                    }
+                    updatedQuestions.add(existingQuestion);
+
+                } else {
+                    // CREATE NEW QUESTION
+                    Question newQuestion = new Question();
+                    newQuestion.setText(incomingQuestion.getText());
+                    newQuestion.setDescription(incomingQuestion.getDescription());
+                    newQuestion.setScore(incomingQuestion.getScore() != null ? incomingQuestion.getScore() : 1);
+                    newQuestion.setQuiz(existingQuiz);
+
+                    // Assuming mergeAnswers can also handle creating answers for a brand new question entity
+                    mergeAnswers(newQuestion, incomingQuestion.getOptions(), incomingQuestion.getCorrectOption());
+
+                    updatedQuestions.add(newQuestion);
                 }
-                updatedQuestions.add(incomingQuestion);
             }
 
             existingQuiz.getQuestions().clear();
@@ -169,40 +181,29 @@ public class QuizService {
         return userTrackerService.submit(id,payload,userId);
     }
 
-    private void mergeAnswers(Question existingQuestion, List<Answer> incomingAnswers) {
-        if (existingQuestion.getAnswers() == null) {
-            existingQuestion.setAnswers(new ArrayList<>());
+    private void mergeAnswers(Question question, List<String> options, Integer correctOption) {
+        if (question.getAnswers() == null) {
+            question.setAnswers(new ArrayList<>());
+        } else {
+            // Clear old answers. Hibernate will delete them because of orphanRemoval=true
+            question.getAnswers().clear();
         }
 
-        if (incomingAnswers == null || incomingAnswers.isEmpty()) {
-            existingQuestion.getAnswers().clear();
+        if (options == null || options.isEmpty()) {
             return;
         }
 
-        List<Answer> updatedAnswers = new ArrayList<>();
+        // Rebuild the answers from the frontend strings
+        for (int i = 0; i < options.size(); i++) {
+            Answer newAnswer = new Answer();
+            newAnswer.setAnswerText(options.get(i));
 
-        for (Answer incomingAnswer : incomingAnswers) {
-            if (incomingAnswer.getAnswerId() != null) {
-                Answer existingAnswer = existingQuestion.getAnswers()
-                        .stream()
-                        .filter(a -> a.getAnswerId().equals(incomingAnswer.getAnswerId()))
-                        .findFirst()
-                        .orElse(null);
+            // If the current loop index matches the correctOption index, mark it true
+            newAnswer.setCorrect(correctOption != null && correctOption.equals(i));
 
-                if (existingAnswer != null) {
-                    existingAnswer.setAnswerText(incomingAnswer.getAnswerText());
-                    existingAnswer.setCorrect(incomingAnswer.isCorrect());
-                    updatedAnswers.add(existingAnswer);
-                    continue;
-                }
-            }
+            newAnswer.setQuestion(question);
 
-            incomingAnswer.setAnswerId(null);
-            incomingAnswer.setQuestion(existingQuestion);
-            updatedAnswers.add(incomingAnswer);
+            question.getAnswers().add(newAnswer);
         }
-
-        existingQuestion.getAnswers().clear();
-        existingQuestion.getAnswers().addAll(updatedAnswers);
     }
 }

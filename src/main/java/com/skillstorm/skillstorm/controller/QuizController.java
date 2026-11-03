@@ -112,6 +112,8 @@ public class QuizController {
     public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody UpdateQuizRequest updatedQuiz, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
 
+            System.out.println("Updated: " + updatedQuiz);
+
             QuizUpdatePayload payload = QuizUpdatePayload.builder()
                     .id(id)
                     .request(updatedQuiz)
@@ -126,6 +128,7 @@ public class QuizController {
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch(Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

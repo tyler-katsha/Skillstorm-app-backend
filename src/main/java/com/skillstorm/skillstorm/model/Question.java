@@ -28,9 +28,10 @@ public class Question {
     private String text;
 
     @Column(name = "score", nullable = false)
-    private int score = 1;
+    @Builder.Default
+    private Integer score = 1;
 
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
