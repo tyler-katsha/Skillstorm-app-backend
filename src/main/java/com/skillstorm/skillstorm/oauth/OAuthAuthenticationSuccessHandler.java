@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.oauth;
 
+import com.skillstorm.skillstorm.enums.AuthProvider;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
 import com.skillstorm.skillstorm.model.User;
@@ -50,6 +51,8 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
 
         User user = userRepository.findByEmail(email)
                 .map(existingUser -> {
+
+                    if(existingUser.getAuthProvider() == null) existingUser.setAuthProvider(AuthProvider.OAUTH);
                     // User already exists; keep existing unique username to avoid overwrite collisions
                     return userRepository.save(existingUser);
                 })
@@ -64,6 +67,7 @@ public class OAuthAuthenticationSuccessHandler extends SimpleUrlAuthenticationSu
                                     .email(email)
                                     .createdAt(LocalDateTime.now())
                                     .attempts(List.of())
+                                    .authProvider(AuthProvider.OAUTH)
                                     .build());
                 });
 

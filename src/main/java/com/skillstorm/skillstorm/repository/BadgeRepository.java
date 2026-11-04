@@ -13,7 +13,6 @@ import java.util.List;
 
 public interface BadgeRepository extends JpaRepository<Badge, Integer> {
 
-    @Modifying
     @Query("""
         SELECT new com.skillstorm.skillstorm.dto.responses.SmallBadgeResponse(b.title, b.definitionId, b.icon)
         FROM Badge b
@@ -22,7 +21,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Integer> {
     """)
     List<SmallBadgeResponse> find4BadgesToDisplay();
 
-    @Modifying
     @Query("""
         SELECT new com.skillstorm.skillstorm.dto.responses.BadgeResponse(b.id, b.title, b.description, b.icon, b.goal, ub.currentProgress)
         FROM UserBadge ub

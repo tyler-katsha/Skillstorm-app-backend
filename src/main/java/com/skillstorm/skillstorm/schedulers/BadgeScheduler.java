@@ -1,6 +1,5 @@
 package com.skillstorm.skillstorm.schedulers;
 
-import com.skillstorm.skillstorm.enums.Kind;
 import com.skillstorm.skillstorm.model.Badge;
 import com.skillstorm.skillstorm.model.UserBadge;
 import com.skillstorm.skillstorm.model.UserOverallStats;
@@ -29,6 +28,7 @@ public class BadgeScheduler {
     private final BadgeRepository badgeRepository;
     private final UserBadgeRepository userBadgeRepository;
     private final BadgeUtils utils;
+
 
     @Transactional
     @Scheduled(fixedDelay = 30000) // Runs every 30 seconds

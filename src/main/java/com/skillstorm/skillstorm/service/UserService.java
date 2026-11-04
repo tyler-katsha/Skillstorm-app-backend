@@ -114,13 +114,6 @@ public class UserService {
         return userMapper.mapToResponse(existingUser);
     }
 
-    @Cacheable(cacheNames = "emailUsers",key="#email")
-    public User findByEmail(String email) {
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
-    }
-
     @Cacheable(cacheNames = "user",key="'all'")
     public List<UserResponse> getAll() {
         return userRepository
@@ -128,11 +121,6 @@ public class UserService {
             .stream()
             .map(userMapper::mapToResponse)
             .toList();
-    }
-
-    @Cacheable(cacheNames = "user",key="'top10'")
-    public List<User> findTop10ByOrderByXpDesc(){
-        return userRepository.findTop10ByOrderByXpDesc();
     }
 
     @Cacheable(cacheNames = "user",key="'leaderboard_all'")

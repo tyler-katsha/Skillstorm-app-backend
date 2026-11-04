@@ -296,6 +296,7 @@ public class UserTrackerService {
 
         UserProfile profileDetails = userMapper.mapToProfile(user);
         int rank = leaderboardService.getUserGlobalRank(userId);
+        System.out.println("Rank: " + rank);
 
         return ProfileTrackerAPIResponse.builder()
                 .user(profileDetails)

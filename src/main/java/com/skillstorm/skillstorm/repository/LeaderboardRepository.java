@@ -11,15 +11,12 @@ import java.util.Optional;
 public interface LeaderboardRepository extends JpaRepository<LeaderboardEntry,Integer> {
 
     // O(1) instant lookup
-    @Modifying
     @Query("SELECT l.rank FROM LeaderboardEntry l WHERE l.userId = :userId")
     Integer findRankByUserId(@Param("userId") int userId);
 
-    @Modifying
     @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END " + "FROM LeaderboardEntry l " + " WHERE l.userId = :userId AND l.rank = 1")
     Boolean isGlobalChampion(@Param("userId") int userId);
 
-    @Modifying
     @Query(
             value = "WITH RankedUsers AS (" +
                     "  SELECT user_id, PERCENT_RANK() OVER (ORDER BY xp DESC) AS p_rank " +
@@ -30,5 +27,10 @@ public interface LeaderboardRepository extends JpaRepository<LeaderboardEntry,In
                     "WHERE user_id = :userId",
             nativeQuery = true
     )
-    Boolean isUserInTop10TenPercentDynamic(@Param("userId") int userId);
+    Long checkUserInTop10Percent(@Param("userId") int userId);
+
+    default Boolean isUserInTop10TenPercentDynamic(int userId) {
+        Long result = checkUserInTop10Percent(userId);
+        return result != null && result == 1L;
+    }
 }

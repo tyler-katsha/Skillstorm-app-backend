@@ -22,7 +22,6 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge,Integer> {
     Optional<UserBadge> findByUserAndBadge(User user, Badge badge);
     List<UserBadge> findByUser(User user);
 
-    @Modifying
     @Query("""
            SELECT new com.skillstorm.skillstorm.dto.responses.BadgeResponse(
                 b.id,b.definitionId, b.title,b.description, b.icon, b.kind,
