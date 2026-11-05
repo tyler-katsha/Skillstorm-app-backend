@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserTrackerService {
 
-    private static Map<Integer,Set<Quiz>> maps = new Hashtable<>();
+    private static final Map<Integer,Set<Quiz>> maps = new Hashtable<>();
     private static final int NOTHING = 0;
     private static final int MULTIPLIER = 10;
     private static final int QUIZ_WON = 50;
@@ -237,8 +237,7 @@ public class UserTrackerService {
                   .map(q -> QuizSummaryDto.builder()
                             .id(q.getQuizId())
                             .title(q.getTitle())
-                          // Assuming your Quiz has getTopics() which returns a list of Topic entities
-                            .topicNames(q.getTopics() != null ? q.getTopics().stream().map(topic -> topic.getName()).collect(Collectors.toList()) : Collections.emptyList())
+                            .topicNames(q.getTopics() != null ? q.getTopics().stream().map(Topic::getName).collect(Collectors.toList()) : Collections.emptyList())
                             .totalQuestions(q.getQuestions() != null ? q.getQuestions().size() : 0)
                             .build())
                   .collect(Collectors.toSet())

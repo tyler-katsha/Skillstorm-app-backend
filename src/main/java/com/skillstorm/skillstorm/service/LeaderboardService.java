@@ -62,7 +62,6 @@ public class LeaderboardService {
 
         List<User> users = userRepository.findAllByOrderByXpDesc();
 
-        // Always clear old entries, even if there are no users.
         leaderboardRepository.deleteAllInBatch();
 
         if (users.isEmpty()) {
@@ -79,7 +78,6 @@ public class LeaderboardService {
 
             User user = users.get(i);
 
-            // Competition ranking: 1, 2, 3, 3, 5
             if (i == 0 || user.getXp() < previousXp) {
                 currentRank = i + 1;
             }
@@ -100,8 +98,7 @@ public class LeaderboardService {
         leaderboardRepository.saveAll(entries);
         leaderboardRepository.flush();
 
-        log.info("Leaderboard successfully refreshed with {} users.",
-                entries.size());
+        log.info("Leaderboard successfully refreshed with {} users.", entries.size());
     }
 
 }

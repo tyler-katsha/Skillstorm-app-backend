@@ -6,10 +6,7 @@ import com.skillstorm.skillstorm.dto.extraDtos.ForgotPassword;
 import com.skillstorm.skillstorm.dto.requests.UserLogin;
 import com.skillstorm.skillstorm.dto.requests.UserRegister;
 import com.skillstorm.skillstorm.enums.FilterType;
-import com.skillstorm.skillstorm.exceptions.AuthorizationException;
-import com.skillstorm.skillstorm.exceptions.InvalidEmailException;
-import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
+import com.skillstorm.skillstorm.exceptions.*;
 import com.skillstorm.skillstorm.service.EmailService;
 import com.skillstorm.skillstorm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +28,6 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegister request){
         try{
-
-            // We can perform a Bloom filter for quick lookups for future implementations
-            boolean valid = emailService.hasMXRecord(request.getEmail());
-
-            if(!valid){
-                throw new InvalidEmailException("Email domain is invalid");
-            }
-
             return ResponseEntity.ok(userService.register(request));
         } catch (UsernameTakenException | AuthorizationException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
@@ -46,7 +35,9 @@ public class AuthenticationController {
             return new ResponseEntity<>("Email domain doesn't exist",HttpStatus.BAD_REQUEST);
         } catch (ResourceNotFoundException e){
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
-        } catch(Exception e){
+        } catch (InvalidUsernameException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch(Exception e){
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

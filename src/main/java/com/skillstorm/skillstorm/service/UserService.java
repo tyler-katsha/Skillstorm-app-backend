@@ -13,9 +13,7 @@ import com.skillstorm.skillstorm.dto.requests.UserRegister;
 import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
 import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.enums.FilterType;
-import com.skillstorm.skillstorm.exceptions.AuthorizationException;
-import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
-import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
+import com.skillstorm.skillstorm.exceptions.*;
 import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
 import com.skillstorm.skillstorm.mappers.UserMapper;
 import jakarta.annotation.PostConstruct;
@@ -59,9 +57,10 @@ public class UserService {
     public String register(UserRegister request) {
 
         // evicts the leaderboard from cache once a new user registers
-        leaderboardService.evictLeaderboardCache();
+        leaderboardService.refreshLeaderboard();
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+
 
         if(existingUser.isPresent()){
             var error = String.format("Existing user with email: %s already exist",request.getEmail());
@@ -70,10 +69,15 @@ public class UserService {
 
         User user = userMapper.toUser(request);
 
+        if(!emailService.hasMXRecord(request.getEmail())){
+            throw new InvalidEmailException("Email domain is invalid");
+        }
         if(isUsernameTaken(user.getUsername())){
             var error = String.format("%s already exist",user.getUsername());
             throw new UsernameTakenException(error);
         }
+
+        if(isValidUsername(user.getUsername())) throw new InvalidUsernameException("malformed username detected: " + user.getUsername());
 
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -81,13 +85,17 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         // adds new user's details to each bloom filter (for username and email)
-        usernameFilter.put(user.getUsername());
-        emailFilter.put(user.getEmail());
+        addToFilters(user.getUsername(),user.getEmail());
 
         // creates locked badges and adds it to the user_badge table in the source of truth
         userBadgeService.initializeBadgesForUser(savedUser);
 
         return "Account created Successfully";
+    }
+
+    private void addToFilters(String username, String email) {
+        usernameFilter.put(username);
+        emailFilter.put(email);
     }
 
     public String login(UserLogin request){
@@ -162,6 +170,12 @@ public class UserService {
     private boolean isEmailTaken(String email){
         if(!emailFilter.mightContain(email)) return false;
         return userRepository.existsByEmail(email);
+    }
+
+    private boolean isValidUsername(String username) {
+       var regex = "^(?!.*@[a-zA-Z0-9-]+\\.[a-zA-Z]{2,})[a-zA-Z0-9_@.-]+$";
+
+       return username != null && username.matches(regex);
     }
 
     public ProfileTrackerAPIResponse history(int userId) {
