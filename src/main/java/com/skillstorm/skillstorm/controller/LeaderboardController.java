@@ -38,7 +38,7 @@ public class LeaderboardController {
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
-        var result = inspectionCacheService.inspectCache("leaderboard");
+        var result = inspectionCacheService.inspectCache("top10Leaderboard");
         return ResponseEntity.ok( result + "\nCache was checked");
     }
 }

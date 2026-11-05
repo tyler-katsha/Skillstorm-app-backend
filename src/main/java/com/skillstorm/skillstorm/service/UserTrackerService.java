@@ -50,7 +50,6 @@ public class UserTrackerService {
 
     @Transactional
     public SubmissionResultDto submit(int id, SubmissionPayload payload, int userId) {
-        leaderboardService.evictLeaderboardCache();
             if (payload == null) {
                 throw new IllegalArgumentException("Payload cannot be null");
             }
@@ -296,7 +295,6 @@ public class UserTrackerService {
 
         UserProfile profileDetails = userMapper.mapToProfile(user);
         int rank = leaderboardService.getUserGlobalRank(userId);
-        System.out.println("Rank: " + rank);
 
         return ProfileTrackerAPIResponse.builder()
                 .user(profileDetails)
