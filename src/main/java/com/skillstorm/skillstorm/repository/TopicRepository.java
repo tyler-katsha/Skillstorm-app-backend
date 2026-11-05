@@ -4,6 +4,7 @@ import com.skillstorm.skillstorm.dto.responses.SmallQuizResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.skillstorm.skillstorm.model.Topic;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public interface TopicRepository extends JpaRepository<Topic, Integer> {
     Optional<Topic> findByNameIgnoreCase(String name);
 
+    @Modifying
     @Query(value = """
         SELECT 
             t.name AS topicName, 

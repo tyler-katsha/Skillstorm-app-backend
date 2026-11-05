@@ -29,7 +29,10 @@ public class Question {
 
     @Column(name = "score", nullable = false)
     @Builder.Default
-    private int score = 1;
+    private Integer score = 1;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)

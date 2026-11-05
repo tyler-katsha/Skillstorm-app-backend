@@ -15,6 +15,5 @@ public class UpdateQuizRequest{
     private String title;
     private String difficulty;
     private List<String> topics;
-    @Builder.Default
-    private List<Question> questions = new ArrayList<>();
+    private List<UpdateQuestionRequest> questions;
 }

@@ -14,6 +14,7 @@ import com.skillstorm.skillstorm.repository.QuizRepository;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import com.skillstorm.skillstorm.repository.UserTrackerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserTrackerService {
 
     private static Map<Integer,Set<Quiz>> maps = new Hashtable<>();
@@ -49,7 +51,6 @@ public class UserTrackerService {
     @Transactional
     public SubmissionResultDto submit(int id, SubmissionPayload payload, int userId) {
         leaderboardService.evictLeaderboardCache();
-        try {
             if (payload == null) {
                 throw new IllegalArgumentException("Payload cannot be null");
             }
@@ -65,6 +66,7 @@ public class UserTrackerService {
 
             List<UserAnswerSubmission> submittedAnswers = payload.getAnswers() != null ? payload.getAnswers() : Collections.emptyList();
 
+            log.debug("SubmittedAnswers: {}",submittedAnswers);
             int totalQuestions = (quiz.getQuestions() != null && !quiz.getQuestions().isEmpty()) ? quiz.getQuestions().size() : submittedAnswers.size();
             int questionsAnswered = submittedAnswers.size();
             int correctAnswers = NOTHING;
@@ -74,6 +76,8 @@ public class UserTrackerService {
                     .filter(Objects::nonNull)
                     .filter(a -> a.getQuestionId() != null && a.getSelectedAnswerId() != null)
                     .collect(Collectors.toMap(UserAnswerSubmission::getQuestionId, UserAnswerSubmission::getSelectedAnswerId, (existing, replacement) -> replacement));
+
+            log.debug("Map: {}",answerMap);
 
             if (quiz.getQuestions() != null) {
                 for (Question question : quiz.getQuestions()) {
@@ -97,6 +101,7 @@ public class UserTrackerService {
             UserTracker tracker = getOrCreateTracker(user);
 
             UserOverallStats stats = tracker.getOverallStats();
+
             if (stats == null) {
                 stats = new UserOverallStats();
             }
@@ -184,9 +189,6 @@ public class UserTrackerService {
                     .currentLevel(currentLevel)
                     .leveledUp(leveledUp)
                     .build();
-        } catch(Exception e) {
-            return null;
-        }
     }
 
     @Transactional
@@ -294,6 +296,7 @@ public class UserTrackerService {
 
         UserProfile profileDetails = userMapper.mapToProfile(user);
         int rank = leaderboardService.getUserGlobalRank(userId);
+        System.out.println("Rank: " + rank);
 
         return ProfileTrackerAPIResponse.builder()
                 .user(profileDetails)
@@ -325,11 +328,11 @@ public class UserTrackerService {
 
         Set<Quiz> quizzes = new HashSet<>();
 
-        quizzes.add(dto.getQuiz());
+        quizzes.add(quiz);
         maps.putIfAbsent(userId,quizzes);
 
         if(maps.containsKey(userId)) {
-            maps.get(userId).add(dto.getQuiz());
+            maps.get(userId).add(quiz);
         }
         userTrackerRepository.saveAndFlush(tracker);
     }

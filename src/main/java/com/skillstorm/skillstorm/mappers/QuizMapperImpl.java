@@ -47,18 +47,6 @@ public class QuizMapperImpl implements QuizMapper {
     }
 
     @Override
-    public List<QuizSummaryDto> mapToSummaryDto(List<Quiz> quizzes) {
-
-        if (quizzes == null || quizzes.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return quizzes.stream()
-                .map(this::mapToSummaryDto)
-                .toList();
-    }
-
-    @Override
     public QuizSummaryDto mapToSummaryDto(Quiz quiz) {
 
         if (quiz == null) {

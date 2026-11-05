@@ -7,7 +7,10 @@ import com.skillstorm.skillstorm.model.User;
 import com.skillstorm.skillstorm.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,6 @@ public class PointService {
     }
 
     protected int calculateLevel(int xp){
-        return (xp / 1000) + 1;
+        return (xp / 50) + 1;
     }
 }

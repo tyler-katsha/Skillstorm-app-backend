@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.skillstorm.skillstorm.enums.AuthProvider;
 import com.skillstorm.skillstorm.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,8 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"badges", "attempts", "roles"})
-@ToString(exclude = {"badges", "attempts", "roles"})
 public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +58,11 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "oauth2", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Override
     @NullMarked

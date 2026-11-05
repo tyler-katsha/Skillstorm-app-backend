@@ -1,5 +1,6 @@
 package com.skillstorm.skillstorm.dto.responses;
 
+import com.skillstorm.skillstorm.enums.AuthProvider;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.Attempt;
 import lombok.AllArgsConstructor;
@@ -23,5 +24,5 @@ public class UserResponse {
     private Integer level;
     private List<Attempt> attempts;
     private String createdAt;
-
+    private AuthProvider authProvider;
 }

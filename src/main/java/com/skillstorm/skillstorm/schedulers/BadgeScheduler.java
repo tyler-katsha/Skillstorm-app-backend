@@ -1,6 +1,5 @@
 package com.skillstorm.skillstorm.schedulers;
 
-import com.skillstorm.skillstorm.enums.Kind;
 import com.skillstorm.skillstorm.model.Badge;
 import com.skillstorm.skillstorm.model.UserBadge;
 import com.skillstorm.skillstorm.model.UserOverallStats;
@@ -30,22 +29,20 @@ public class BadgeScheduler {
     private final UserBadgeRepository userBadgeRepository;
     private final BadgeUtils utils;
 
+
     @Transactional
-    @Scheduled(cron = "0 0 * * * *") // Runs every hour
+    @Scheduled(fixedDelay = 30000) // Runs every 30 seconds
     public void fetchAndUpdateBadgesForUsers(){
-        log.info("Starting hourly badge reconciliation...");
+        log.info("Starting 30sec badge reconciliation...");
 
         List<Badge> allBadges = badgeRepository.findAll();
 
 
         List<UserTracker> allTrackers = userTrackerRepository.findUsersActiveSince(yesterday);
 
-        System.out.println(allTrackers);
 
         for (UserTracker userTracker: allTrackers) {
             UserOverallStats stats = userTracker.getOverallStats();
-
-            System.out.println(stats);
 
             if(stats == null) continue;
 
@@ -67,7 +64,7 @@ public class BadgeScheduler {
                     if(userBadge.getCurrentProgress() >= badge.getGoal()) {
                         userBadge.setEarned(true);
                         userBadge.setEarnedAt(Instant.now());
-                        log.info("User {} earned badge: {}",userTracker.getUser().getUserId(), badge.getTitle());
+                        log.info("User {} earned badge: {}",userTracker.getUser().getEmail(), badge.getTitle());
                     }
 
                     userBadgeRepository.save(userBadge);

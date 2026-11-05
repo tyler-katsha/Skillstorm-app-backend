@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class QuizUncompletedWorker implements BackgroundWorker<QuizUncompletedPayload>{
 
-    private UserTrackerService userTrackerService;
+    private final UserTrackerService userTrackerService;
 
     @Override
     public void process(QuizUncompletedPayload val) {

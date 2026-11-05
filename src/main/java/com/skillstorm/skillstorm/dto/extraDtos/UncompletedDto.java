@@ -12,5 +12,5 @@ public class UncompletedDto {
     private int currentQuestion;
     private int totalQuestions;
     private int percentage;
-    private Quiz quiz;
+    private UserAnswerSubmission answerSubmission;
 }

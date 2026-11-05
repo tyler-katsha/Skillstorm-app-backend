@@ -24,6 +24,7 @@ public class QuestionMapperImpl implements QuestionMapper {
 
         response.setQuestionId(question.getQuestionId());
         response.setText(question.getText());
+        response.setDescription(question.getDescription());
         response.setScore(question.getScore());
 
         if (question.getAnswers() != null) {
@@ -61,20 +62,9 @@ public class QuestionMapperImpl implements QuestionMapper {
 
         return Question.builder()
                 .text(request.getText())
-                .score(1)
+                .score(10)
+                .description(request.getDescription())
                 .build();
-    }
-
-    @Override
-    public List<Question> toQuestion(List<CreateQuestionRequest> questions) {
-
-        if (questions == null || questions.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return questions.stream()
-                .map(this::toQuestion)
-                .toList();
     }
 
     private AnswerResponse mapAnswer(Answer answer) {

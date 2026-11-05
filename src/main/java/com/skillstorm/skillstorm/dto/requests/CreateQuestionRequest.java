@@ -14,5 +14,6 @@ import java.util.List;
 public class CreateQuestionRequest {
     private String text;
     private List<String> options;
+    private String description;
     private Integer correctOption;
 }

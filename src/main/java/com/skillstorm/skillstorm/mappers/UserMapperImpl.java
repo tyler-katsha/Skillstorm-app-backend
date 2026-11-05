@@ -3,6 +3,7 @@ package com.skillstorm.skillstorm.mappers;
 import com.skillstorm.skillstorm.dto.extraDtos.UserProfile;
 import com.skillstorm.skillstorm.dto.requests.UserRegister;
 import com.skillstorm.skillstorm.dto.responses.UserResponse;
+import com.skillstorm.skillstorm.enums.AuthProvider;
 import com.skillstorm.skillstorm.enums.Role;
 import com.skillstorm.skillstorm.model.User;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,8 @@ public class UserMapperImpl implements UserMapper{
                 .xp(0)
                 .attempts(List.of())
                 .roles(Set.of(Role.USER))
+                .attempts(List.of())
+                .authProvider(AuthProvider.LOCAL)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -54,8 +57,10 @@ public class UserMapperImpl implements UserMapper{
                 .email(user.getEmail())
                 .roles(user.getRoles())
                 .xp(user.getXp())
+                .level(user.getLevel())
                 .attempts(user.getAttempts())
                 .createdAt(user.getCreatedAt().toString())
+                .authProvider(user.getAuthProvider())
                 .build();
     }
 }

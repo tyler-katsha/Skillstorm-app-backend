@@ -38,6 +38,20 @@ public class BadgeMapperImpl implements BadgeMapper{
 
     @Override
     public BadgeResponse mapToBadgeResponse(UserBadge userBadge) {
-        return null;
+
+        Badge badge = userBadge.getBadge();
+
+        return BadgeResponse.builder()
+                .id(userBadge.getId())
+                .definitionId(badge.getDefinitionId())
+                .title(badge.getTitle())
+                .description(badge.getDescription())
+                .icon(badge.getIcon())
+                .kind(badge.getKind())
+                .goal(badge.getGoal())
+                .currentProgress(userBadge.getCurrentProgress())
+                .isEarned(userBadge.isEarned())
+                .earnedAt(userBadge.getEarnedAt())
+                .build();
     }
 }

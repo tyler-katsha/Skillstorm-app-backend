@@ -41,6 +41,8 @@ public class UserService {
     private final BloomFilter<String> emailFilter;
     private final UserTrackerService userTrackerService;
     private final EmailService emailService;
+    private final UserBadgeService userBadgeService;
+    private final LeaderboardService leaderboardService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -56,24 +58,34 @@ public class UserService {
 
     public String register(UserRegister request) {
 
+        // evicts the leaderboard from cache once a new user registers
+        leaderboardService.evictLeaderboardCache();
+
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         if(existingUser.isPresent()){
-            throw new AuthorizationException(String.format("Existing user with email: %s already exist",request.getEmail()));
+            var error = String.format("Existing user with email: %s already exist",request.getEmail());
+            throw new AuthorizationException(error);
         }
 
         User user = userMapper.toUser(request);
 
         if(isUsernameTaken(user.getUsername())){
-            throw new UsernameTakenException(user.getUsername() + " already exist");
+            var error = String.format("%s already exist",user.getUsername());
+            throw new UsernameTakenException(error);
         }
+
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
+        // adds new user's details to each bloom filter (for username and email)
         usernameFilter.put(user.getUsername());
         emailFilter.put(user.getEmail());
+
+        // creates locked badges and adds it to the user_badge table in the source of truth
+        userBadgeService.initializeBadgesForUser(savedUser);
 
         return "Account created Successfully";
     }
@@ -102,13 +114,6 @@ public class UserService {
         return userMapper.mapToResponse(existingUser);
     }
 
-    @Cacheable(cacheNames = "emailUsers",key="#email")
-    public User findByEmail(String email) {
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
-    }
-
     @Cacheable(cacheNames = "user",key="'all'")
     public List<UserResponse> getAll() {
         return userRepository
@@ -116,11 +121,6 @@ public class UserService {
             .stream()
             .map(userMapper::mapToResponse)
             .toList();
-    }
-
-    @Cacheable(cacheNames = "user",key="'top10'")
-    public List<User> findTop10ByOrderByXpDesc(){
-        return userRepository.findTop10ByOrderByXpDesc();
     }
 
     @Cacheable(cacheNames = "user",key="'leaderboard_all'")

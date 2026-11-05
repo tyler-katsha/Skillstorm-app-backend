@@ -14,5 +14,6 @@ public class QuestionResponse {
     private Integer questionId;
     private String text;
     private int score;
+    private String description;
     private List<AnswerResponse> answers;
 }

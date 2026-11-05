@@ -38,7 +38,6 @@ public class UserController {
 
     private final UserService userService;
     private final InspectionCacheService inspectionCacheService;
-    private final QuizUncompletedQueueProcessor uncompletedQueueProcessor;
     // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
     @RateLimited(capacity = 30,tokens = 30,duration = 10,unit = ChronoUnit.MINUTES)
@@ -95,28 +94,7 @@ public class UserController {
         } catch(RateLimitExceededException e) {
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         }catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PostMapping("/uncompleted/{quizId}")
-    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId, @RequestBody UncompletedDto dto, @AuthenticationPrincipal UserPrincipal principal) {
-        try {
-
-            QuizUncompletedPayload payload = QuizUncompletedPayload.builder()
-                    .uncompletedDto(dto)
-                    .quizId(quizId)
-                    .userId(principal.getUserId())
-                    .build();
-
-            uncompletedQueueProcessor.enqueue(payload);
-
-            return ResponseEntity.ok().build();
-        } catch(ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

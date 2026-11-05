@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.repository;
 
 import com.skillstorm.skillstorm.model.LeaderboardEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,5 +27,10 @@ public interface LeaderboardRepository extends JpaRepository<LeaderboardEntry,In
                     "WHERE user_id = :userId",
             nativeQuery = true
     )
-    Boolean isUserInTop10TenPercentDynamic(@Param("userId") int userId);
+    Long checkUserInTop10Percent(@Param("userId") int userId);
+
+    default Boolean isUserInTop10TenPercentDynamic(int userId) {
+        Long result = checkUserInTop10Percent(userId);
+        return result != null && result == 1L;
+    }
 }

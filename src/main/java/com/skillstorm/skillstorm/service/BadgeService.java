@@ -79,10 +79,12 @@ public class BadgeService {
             @CacheEvict(cacheNames = "badge", key="#id"),
             @CacheEvict(cacheNames = "badge", key="'all'")
     })
+    @Transactional
     public void delete(Integer id) {
         if (!badgeRepository.existsById(id)) {
             throw new ResourceNotFoundException("Badge not found: " + id);
         }
+        userBadgeRepository.deleteByBadgeId(id);
         badgeRepository.deleteById(id);
     }
 
