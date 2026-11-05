@@ -46,6 +46,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS,"/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/leaderboard")
+                        .permitAll()
                         .requestMatchers("/api/auth/**","/oauth2/**","/error","/ws/**", "/api/duel/**")
                         .permitAll()
                         .anyRequest()

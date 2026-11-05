@@ -24,7 +24,6 @@ public class LeaderboardController {
 
     @GetMapping
     @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<?> findAll() {
         try{
             return ResponseEntity.ok(leaderboardService.findAll()); // 200 HTTP STATUS
