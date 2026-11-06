@@ -1,24 +1,31 @@
 package com.skillstorm.skillstorm.service;
 
-import com.skillstorm.skillstorm.model.Badge;
-import com.skillstorm.skillstorm.model.User;
-import com.skillstorm.skillstorm.model.UserBadge;
+import com.skillstorm.skillstorm.model.*;
 import com.skillstorm.skillstorm.repository.BadgeRepository;
 import com.skillstorm.skillstorm.repository.UserBadgeRepository;
+import com.skillstorm.skillstorm.repository.UserTrackerRepository;
+import com.skillstorm.skillstorm.utils.BadgeUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.skillstorm.skillstorm.utils.TimeUtils.yesterday;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserBadgeService {
 
     private final UserBadgeRepository userBadgeRepository;
     private final BadgeRepository badgeRepository;
+    private final UserTrackerRepository userTrackerRepository;
+    private final BadgeUtils utils;
 
     @Transactional
     public UserBadge addProgress(User user, Badge badge, int progressAmount) {

@@ -6,5 +6,8 @@ public enum Kind {
     PERFECT,
     HIGH_SCORES,
     TOPICS,
-    LEADERBOARD
+    LEADERBOARD,
+    TOP_10,
+    PODIUM_FINISH,
+    GLOBAL_CHAMP
 }

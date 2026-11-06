@@ -6,7 +6,10 @@ import com.skillstorm.skillstorm.dto.extraDtos.ForgotPassword;
 import com.skillstorm.skillstorm.dto.requests.UserLogin;
 import com.skillstorm.skillstorm.dto.requests.UserRegister;
 import com.skillstorm.skillstorm.enums.FilterType;
+import com.skillstorm.skillstorm.enums.Kind;
 import com.skillstorm.skillstorm.exceptions.*;
+import com.skillstorm.skillstorm.repository.BadgeRepository;
+import com.skillstorm.skillstorm.repository.LeaderboardRepository;
 import com.skillstorm.skillstorm.service.EmailService;
 import com.skillstorm.skillstorm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,7 +26,7 @@ import java.time.temporal.ChronoUnit;
 public class AuthenticationController {
 
     private final UserService userService;
-    private final EmailService emailService;
+    private final BadgeRepository badgeRepository;
 
     @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/register")

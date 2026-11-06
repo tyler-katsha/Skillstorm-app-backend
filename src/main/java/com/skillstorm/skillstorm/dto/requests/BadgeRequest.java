@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BadgeRequest {
-
     private String definitionId;
     private String title;
     private String description;

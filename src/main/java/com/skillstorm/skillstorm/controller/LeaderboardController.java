@@ -41,4 +41,12 @@ public class LeaderboardController {
         var result = inspectionCacheService.inspectCache("top10Leaderboard");
         return ResponseEntity.ok( result + "\nCache was checked");
     }
+
+    @GetMapping("/refresh")
+    @RateLimited(unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
+    public ResponseEntity<Void> refreshLeaderboard() {
+        leaderboardService.refreshLeaderboard();
+        return ResponseEntity.ok().build();
+    }
 }

@@ -71,14 +71,22 @@ public class BadgeController {
     }
 
     @PutMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 20, tokens = 20, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
-    public Badge update(@PathVariable Integer id, @RequestBody BadgeRequest updated) {
-        return badgeService.update(id, updated);
+    public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody BadgeRequest updated) {
+        try {
+
+            badgeService.update(id, updated);
+            return ResponseEntity.ok().build();
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch(Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try{

@@ -14,7 +14,7 @@ public class LeaderboardScheduler {
 
     private final LeaderboardService leaderboardService;
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = 60000)
     public void updateLeaderboard() {
 
         log.info("Executing scheduled leaderboard update...");

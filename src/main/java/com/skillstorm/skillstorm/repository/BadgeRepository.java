@@ -2,6 +2,7 @@ package com.skillstorm.skillstorm.repository;
 
 import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
 import com.skillstorm.skillstorm.dto.responses.SmallBadgeResponse;
+import com.skillstorm.skillstorm.enums.Kind;
 import com.skillstorm.skillstorm.model.Badge;
 import org.checkerframework.checker.units.qual.N;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,10 @@ public interface BadgeRepository extends JpaRepository<Badge, Integer> {
         FETCH FIRST 1 ROW ONLY
     """)
     BadgeResponse findNextBadgeToUnlock(@Param("userId") int userId);
+
+    @Query("SELECT b.definitionId FROM Badge b WHERE b.kind = :kind")
+    List<String> findAllByKind(@Param("kind") Kind kind);
+
+    @Query("SELECT b.goal FROM Badge b WHERE b.definitionId = :definitionId")
+    int findGoalByDefinitionId(@Param("definitionId") String definitionId);
 }

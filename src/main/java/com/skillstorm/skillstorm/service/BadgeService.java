@@ -11,9 +11,11 @@ import com.skillstorm.skillstorm.model.UserBadge;
 import com.skillstorm.skillstorm.repository.UserBadgeRepository;
 import com.skillstorm.skillstorm.worker.BadgeQueueProcessor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import com.skillstorm.skillstorm.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BadgeService {
 
     private final BadgeRepository badgeRepository;
@@ -62,30 +65,40 @@ public class BadgeService {
     @Caching(evict = {
             @CacheEvict(cacheNames = "badge", key="'all'")
     })
-    public Badge update(Integer id, BadgeRequest request) {
-        Badge existing = getById(id);
+    public void update(Integer id, BadgeRequest request) {
+        UserBadge existingUserBadge = userBadgeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("UserBadge not found id: " + id));
 
-        existing.setDefinitionId(request.getDefinitionId());
-        existing.setTitle(request.getTitle());
-        existing.setDescription(request.getDescription());
-        existing.setIcon(request.getIcon());
-        existing.setKind(request.getKind());
-        existing.setGoal(request.getGoal());
+        int badgeId = existingUserBadge.getBadge().getId();
 
-        return badgeRepository.save(existing);
+        Badge existingBadge = badgeRepository.findById(badgeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Badge not found id: " + badgeId));
+
+        existingBadge.setDefinitionId(request.getDefinitionId());
+        existingBadge.setTitle(request.getTitle());
+        existingBadge.setDescription(request.getDescription());
+        existingBadge.setIcon(request.getIcon());
+        existingBadge.setKind(request.getKind());
+        existingBadge.setGoal(request.getGoal());
+
+
+        badgeRepository.save(existingBadge);
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = "badge", key="#id"),
-            @CacheEvict(cacheNames = "badge", key="'all'")
+            @CacheEvict(cacheNames = "badge", allEntries = true)
     })
     @Transactional
     public void delete(Integer id) {
-        if (!badgeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Badge not found: " + id);
-        }
+
+        UserBadge userBadge = userBadgeRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("UserBadge not found: " + id));
+
+        Integer badgeId = userBadge.getBadge().getId();
+
         userBadgeRepository.deleteByBadgeId(id);
-        badgeRepository.deleteById(id);
+
+        badgeRepository.deleteById(badgeId);
     }
 
     @Transactional
@@ -123,5 +136,9 @@ public class BadgeService {
 
     public BadgeResponse findNextBadgeToUnlock(int userId) {
         return badgeRepository.findNextBadgeToUnlock(userId);
+    }
+
+    public int findGoalByDefinitionId(@Param("definitionId") String definitionId) {
+        return badgeRepository.findGoalByDefinitionId(definitionId);
     }
 }

@@ -13,8 +13,7 @@ public class BotFingerprintSignatures {
     );
 
     // Browser User-Agent patterns
-    public static final Pattern BROWSER_UA_PATTERN =
-            Pattern.compile("Mozilla/5\\.0.*(Chrome|Safari|Firefox|Edg)/.*");
+    public static final Pattern BROWSER_UA_PATTERN = Pattern.compile("Mozilla/5\\.0.*(Chrome|Safari|Firefox|Edg)/.*");
 
     // Standard Chrome desktop JA3 (example hash; vary across Chrome versions)
     public static final Set<String> CHROME_FAMILY_JA3 = Set.of(

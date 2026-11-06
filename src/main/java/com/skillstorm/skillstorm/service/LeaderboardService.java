@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.skillstorm.model.User;
@@ -39,20 +41,6 @@ public class LeaderboardService {
         log.info("Cache miss! Querying database for top 10 users by XP...");
         return leaderboardRepository.findAll();
     }
-
-    @CacheEvict(value = "top10Leaderboard", allEntries = true)
-    public void evictLeaderboardCache() {
-        log.info("Leaderboard cache manually evicted.");
-    }
-
-    public boolean isUserInTop10TenPercentDynamic(Integer userId) {
-        return leaderboardRepository.isUserInTop10TenPercentDynamic(userId);
-    }
-
-    public boolean isGlobalChampion(Integer userId) {
-        return leaderboardRepository.isGlobalChampion(userId);
-    }
-
 
     @Transactional
     @CacheEvict(value = "top10Leaderboard", allEntries = true)
@@ -101,4 +89,19 @@ public class LeaderboardService {
         log.info("Leaderboard successfully refreshed with {} users.", entries.size());
     }
 
+    public boolean isUserInTop10TenPercentDynamic(int userId) {
+
+        int rank = getUserGlobalRank(userId);
+        long totalUsers = leaderboardRepository.count();
+
+        if(rank == -1 || totalUsers == 0) return false;
+
+        int topTenPercent = (int) Math.ceil(totalUsers * 0.10);
+
+        return rank <= topTenPercent;
+    }
+
+    public boolean isGlobalChampion(int userId) {
+        return getUserGlobalRank(userId) == 1;
+    }
 }

@@ -49,14 +49,14 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public Question update(@PathVariable Integer id, @RequestBody Question updated) {
         return questionService.update(id, updated);
     }
 
     @DeleteMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Integer id) {
         questionService.delete(id);
