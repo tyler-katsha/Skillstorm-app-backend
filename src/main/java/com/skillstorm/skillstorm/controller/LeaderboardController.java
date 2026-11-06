@@ -1,6 +1,7 @@
 package com.skillstorm.skillstorm.controller;
 
 import com.skillstorm.skillstorm.annotations.RateLimited;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class LeaderboardController {
             return ResponseEntity.ok(leaderboardService.findAll()); // 200 HTTP STATUS
         } catch (ResourceNotFoundException e){
             return new ResponseEntity<>("Leaderboard user was not found.",HttpStatus.NOT_FOUND); // 404 HTTP STATUS
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>("Something went wrong. Please try again",HttpStatus.INTERNAL_SERVER_ERROR); // 500 HTTP STATUS
         }

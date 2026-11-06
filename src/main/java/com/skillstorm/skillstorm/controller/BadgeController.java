@@ -6,6 +6,7 @@ import java.util.List;
 import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.requests.BadgeRequest;
 import com.skillstorm.skillstorm.dto.responses.BadgeResponse;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
@@ -44,6 +45,8 @@ public class BadgeController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e) {
             return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -65,6 +68,8 @@ public class BadgeController {
             return ResponseEntity.ok(badgeService.findBadgesByUser(principal.getUserId()));
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e) {
             return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -80,6 +85,8 @@ public class BadgeController {
             return ResponseEntity.ok().build();
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -94,8 +101,9 @@ public class BadgeController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -117,6 +125,8 @@ public class BadgeController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e) {
             return new ResponseEntity<>("Something went wrong.",HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -126,6 +136,14 @@ public class BadgeController {
     @RateLimited(capacity = 20, tokens = 20, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<BadgeResponse> findNextBadgeToUnlock(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(badgeService.findNextBadgeToUnlock(principal.getUserId()));
+        try {
+            return ResponseEntity.ok(badgeService.findNextBadgeToUnlock(principal.getUserId()));
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

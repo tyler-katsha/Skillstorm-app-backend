@@ -6,6 +6,7 @@ import java.util.List;
 import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.extraDtos.UncompletedDto;
 import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
+import com.skillstorm.skillstorm.dto.requests.UserUpdateRequest;
 import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
 import com.skillstorm.skillstorm.dto.responses.UserResponse;
 import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
@@ -38,6 +39,21 @@ public class UserController {
 
     private final UserService userService;
     private final InspectionCacheService inspectionCacheService;
+
+    @GetMapping
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAll() {
+        try {
+            return ResponseEntity.ok(userService.getAll());
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     // UserPrincipal is fetching the logged-in user id from the JWT Token.
     @GetMapping("/me")
     @RateLimited(capacity = 30,tokens = 30,duration = 10,unit = ChronoUnit.MINUTES)
@@ -46,37 +62,42 @@ public class UserController {
         return ResponseEntity.ok(userService.getById(principal.getUserId()));
     }
 
-    @GetMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+
+
+    @PutMapping
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public UserResponse getById(@PathVariable Integer id) {
-        return userService.getById(id);
+    public ResponseEntity<?> update(@AuthenticationPrincipal UserPrincipal principal, @RequestBody UserUpdateRequest request) {
+        try {
+            return ResponseEntity.ok(userService.update(principal.getUserId(),request));
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
+        } catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @GetMapping
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getAll() {
-        return userService.getAll();
-    }
-
-    @PutMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @DeleteMapping
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public User update(@PathVariable Integer id, @RequestBody User updated) {
-        return userService.update(updated);
-    }
-
-    @DeleteMapping("/{id}")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
-    public ResponseEntity<String> delete(@PathVariable Integer id) {
-        userService.delete(id);
-        return ResponseEntity.ok("Delete operation successful.");
+    public ResponseEntity<String> delete(@AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            userService.delete(principal.getUserId());
+            return ResponseEntity.ok("Account has been removed successfully");
+        } catch(ResourceNotFoundException e){
+            return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
+        } catch(Exception e){
+            return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/cache")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("user");
@@ -94,7 +115,6 @@ public class UserController {
         } catch(RateLimitExceededException e) {
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         }catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

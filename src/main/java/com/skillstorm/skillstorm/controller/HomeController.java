@@ -4,6 +4,7 @@ import com.skillstorm.skillstorm.annotations.RateLimited;
 import com.skillstorm.skillstorm.dto.extraDtos.HomeSection;
 import com.skillstorm.skillstorm.dto.responses.SmallBadgeResponse;
 import com.skillstorm.skillstorm.dto.responses.SmallQuizResponse;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.service.BadgeService;
 import com.skillstorm.skillstorm.service.TopicService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,8 @@ public class HomeController {
                     .build();
 
             return ResponseEntity.ok(sections);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

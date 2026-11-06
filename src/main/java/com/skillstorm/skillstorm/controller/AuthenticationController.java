@@ -41,7 +41,9 @@ public class AuthenticationController {
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch (InvalidUsernameException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }catch(Exception e){
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
+        } catch(Exception e){
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -53,6 +55,8 @@ public class AuthenticationController {
             return ResponseEntity.ok(userService.login(request));
         } catch(ResourceNotFoundException e){
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -65,17 +69,36 @@ public class AuthenticationController {
         try{
             var type = FilterType.valueOf(bloom.getType());
             return ResponseEntity.ok(userService.takenType(type,bloom.getValue()));
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>("Internal Server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+
+    @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
+    @PostMapping("/email")
+    public ResponseEntity<Void> sendForgetEmail(@RequestParam String email) {
+        try {
+            userService.sendForgetEmail(email);
+            return ResponseEntity.ok().build();
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        } catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPassword payload) {
         try {
             userService.forgotPassword(payload);
             return ResponseEntity.ok().build();
+        } catch(PasswordResetException e){
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ForgotPassword {
     private String email;
+    private String token;
+    private String password;
 }

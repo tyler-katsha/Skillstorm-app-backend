@@ -13,6 +13,7 @@ import com.skillstorm.skillstorm.dto.payloads.SubmissionPayload;
 import com.skillstorm.skillstorm.dto.records.QuizDTO;
 import com.skillstorm.skillstorm.dto.requests.CreateQuizRequest;
 import com.skillstorm.skillstorm.dto.requests.UpdateQuizRequest;
+import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
@@ -51,7 +52,7 @@ public class QuizController {
     private final QuizUncompletedQueueProcessor uncompletedQueueProcessor;
 
     @PostMapping
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Quiz> create(@RequestBody CreateQuizRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try{
@@ -65,13 +66,15 @@ public class QuizController {
             return ResponseEntity
                     .status(HttpStatus.CREATED).build();
 
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/batch")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> batchCreate(@RequestBody List<CreateQuizRequest> requests, @AuthenticationPrincipal UserPrincipal principal) {
         try{
@@ -87,6 +90,8 @@ public class QuizController {
             return ResponseEntity
                     .status(HttpStatus.CREATED).build();
 
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -112,8 +117,6 @@ public class QuizController {
     public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody UpdateQuizRequest updatedQuiz, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
 
-            System.out.println("Updated: " + updatedQuiz);
-
             QuizUpdatePayload payload = QuizUpdatePayload.builder()
                     .id(id)
                     .request(updatedQuiz)
@@ -127,25 +130,31 @@ public class QuizController {
 
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
-    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try{
             quizService.delete(id);
             return ResponseEntity.ok().build();
+        } catch(ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/cache")
-    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("quiz");
@@ -154,7 +163,7 @@ public class QuizController {
 
 
     @PostMapping("/{id}/submit")
-    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<SubmissionResultDto> submit(@PathVariable int id, @RequestBody SubmissionPayload payload, @AuthenticationPrincipal UserPrincipal principal) {
         try {
@@ -162,13 +171,15 @@ public class QuizController {
             return ResponseEntity.ok(quizService.submit(id,payload,principal.getUserId()));
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/uncompleted/{quizId}")
-    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Void> saveUncompletedQuiz(@PathVariable int quizId, @RequestBody UncompletedDto dto, @AuthenticationPrincipal UserPrincipal principal) {
         try {
@@ -184,6 +195,8 @@ public class QuizController {
             return ResponseEntity.ok().build();
         } catch(ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RateLimitExceededException e){
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

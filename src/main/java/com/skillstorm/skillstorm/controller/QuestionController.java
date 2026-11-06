@@ -31,18 +31,21 @@ public class QuestionController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
+    @RateLimited(unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Question> create(@RequestBody Question q) {
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.create(q));
     }
 
     @GetMapping("/{id}")
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public Question getById(@PathVariable Integer id) {
         return questionService.getById(id);
     }
 
     @GetMapping
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public List<Question> getAll() {
         return questionService.getAll();
@@ -50,21 +53,21 @@ public class QuestionController {
 
     @PutMapping("/{id}")
     @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public Question update(@PathVariable Integer id, @RequestBody Question updated) {
         return questionService.update(id, updated);
     }
 
     @DeleteMapping("/{id}")
     @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Integer id) {
         questionService.delete(id);
         return ResponseEntity.ok("Delete operation successful.");
     }
 
     @GetMapping("/cache")
-    @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
+    @RateLimited(capacity = 100, tokens = 100, unit = ChronoUnit.MINUTES)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("question");

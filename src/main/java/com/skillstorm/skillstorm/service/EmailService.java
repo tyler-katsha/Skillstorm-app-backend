@@ -32,8 +32,6 @@ public class EmailService {
     @Async
     public void sendEmail(String email,String token) {
 
-
-
         var frontendUrl = String.format("http://localhost:5173/reset-password?token=%s&email=%s",token,email);
         var subject = "Password Reset Requested";
         var message = String.format("You have requested to reset your password. Please click the link below to set a new password:\n\n%s\n\nIf you did not request this, you can safely ignore this email.\n\nThis link will expire shortly.",frontendUrl);

@@ -31,7 +31,7 @@ public class TopicController {
     private final InspectionCacheService inspectionCacheService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Topic> create(@RequestBody Topic topic) {
         return ResponseEntity.status(HttpStatus.CREATED).body(topicService.create(topic));
     }
@@ -49,13 +49,13 @@ public class TopicController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<Topic> update(@PathVariable Integer id, @RequestBody Topic updated) {
         return ResponseEntity.status(HttpStatus.OK).body(topicService.update(updated));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<String> delete(@PathVariable Integer id) {
         topicService.delete(id);
         return ResponseEntity.ok("Delete operation successful.");
@@ -63,7 +63,7 @@ public class TopicController {
 
     @GetMapping("/cache")
     @RateLimited(capacity = 5, tokens = 5, unit = ChronoUnit.MINUTES)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','EMPLOYEE','ADMIN')")
     public ResponseEntity<String> cache(){
         var result = inspectionCacheService.inspectCache("topic");
         return ResponseEntity.ok(result + "\nCache was checked");

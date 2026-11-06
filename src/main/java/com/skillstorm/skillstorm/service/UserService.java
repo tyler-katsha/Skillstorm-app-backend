@@ -10,8 +10,10 @@ import com.skillstorm.skillstorm.dto.extraDtos.UncompletedDto;
 import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
 import com.skillstorm.skillstorm.dto.requests.UserLogin;
 import com.skillstorm.skillstorm.dto.requests.UserRegister;
+import com.skillstorm.skillstorm.dto.requests.UserUpdateRequest;
 import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
 import com.skillstorm.skillstorm.dto.responses.UserResponse;
+import com.skillstorm.skillstorm.enums.AuthProvider;
 import com.skillstorm.skillstorm.enums.FilterType;
 import com.skillstorm.skillstorm.exceptions.*;
 import com.skillstorm.skillstorm.jwts.JwtTokenProvider;
@@ -72,12 +74,9 @@ public class UserService {
         if(!emailService.hasMXRecord(request.getEmail())){
             throw new InvalidEmailException("Email domain is invalid");
         }
-        if(isUsernameTaken(user.getUsername())){
-            var error = String.format("%s already exist",user.getUsername());
-            throw new UsernameTakenException(error);
-        }
+        if(isUsernameTaken(user.getUsername())) throw new UsernameTakenException(String.format("%s already exist",user.getUsername()));
 
-        if(isValidUsername(user.getUsername())) throw new InvalidUsernameException("malformed username detected: " + user.getUsername());
+        if(!isValidUsername(user.getUsername())) throw new InvalidUsernameException("malformed username detected: " + user.getUsername());
 
         // hashes the password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -136,15 +135,25 @@ public class UserService {
         return userRepository.findAllByOrderByXpDesc();
     }
 
-    @CachePut(cacheNames = "user",key="#user.userId")
     @Caching(evict = {
-            @CacheEvict(cacheNames = "user",key="#user.userId"),
-            @CacheEvict(cacheNames = "usernameUsers",key="#user.username"),
             @CacheEvict(cacheNames = "user",key="'all'")
     })
     @Transactional
-    public User update(User user) {
-        return userRepository.save(user);
+    public UserResponse update(int userId, UserUpdateRequest request) {
+
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        if(isUsernameTaken(request.getUsername())) throw new UsernameTakenException(String.format("%s already exist",request.getUsername()));
+        if(!isValidUsername(request.getUsername())) throw new InvalidUsernameException("malformed username detected: " + request.getUsername());
+
+        existingUser.setUsername(request.getUsername());
+
+        usernameFilter.put(request.getUsername());
+
+        User savedUser = userRepository.save(existingUser);
+
+        return userMapper.mapToResponse(savedUser);
     }
     @Caching(evict = {
             @CacheEvict(cacheNames = "user",key="#userId"),
@@ -162,6 +171,7 @@ public class UserService {
             case USERNAME -> isUsernameTaken(val);
         };
     }
+
     private boolean isUsernameTaken(String username){
         if(!usernameFilter.mightContain(username)) return false;
         return userRepository.existsByUsername(username);
@@ -186,6 +196,16 @@ public class UserService {
     public void forgotPassword(ForgotPassword payload) {
 
         var user = userRepository.findByEmail(payload.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
+
+        if(user.getAuthProvider().equals(AuthProvider.OAUTH)) throw new PasswordResetException("Cannot change password for a OAuth based user");
+        user.setPassword(passwordEncoder.encode(payload.getPassword()));
+        userRepository.save(user);
+    }
+
+    public void sendForgetEmail(String email) {
+
+        var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
 
         var token = tokenProvider.generateToken(user);
