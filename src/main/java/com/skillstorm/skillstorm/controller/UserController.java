@@ -75,7 +75,6 @@ public class UserController {
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
-            e.printStackTrace();
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -92,6 +91,7 @@ public class UserController {
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -114,7 +114,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch(RateLimitExceededException e) {
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

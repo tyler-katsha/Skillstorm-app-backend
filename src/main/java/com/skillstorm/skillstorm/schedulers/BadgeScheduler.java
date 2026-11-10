@@ -16,7 +16,7 @@ public class BadgeScheduler {
 
 
     @Transactional
-    @Scheduled(fixedDelay = 60000) // Runs every 60 seconds
+    @Scheduled(fixedDelay = 30000) // Runs every 30 seconds
     public void fetchAndUpdateBadgesForUsers(){
         log.info("Starting 30sec badge reconciliation...");
 

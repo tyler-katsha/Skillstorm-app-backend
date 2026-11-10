@@ -18,4 +18,8 @@ public interface UserTrackerRepository extends JpaRepository<UserTracker,Integer
     @Modifying
     @Query("SELECT ut FROM UserTracker ut WHERE ut.overallStats.lastActivityDate >= :sinceDate")
     List<UserTracker> findUsersActiveSince(@Param("sinceDate") LocalDate sinceDate);
+
+    @Modifying
+    @Query("DELETE FROM UserTracker ut WHERE ut.user.userId = :userId")
+    void deleteByUserId(@Param("userId") int userId);
 }

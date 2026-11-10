@@ -26,25 +26,22 @@ import java.util.List;
 public class AuthenticationController {
 
     private final UserService userService;
-    private final BadgeRepository badgeRepository;
 
     @RateLimited(capacity = 5,tokens = 5,unit = ChronoUnit.MINUTES)
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegister request){
         try{
             return ResponseEntity.ok(userService.register(request));
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         } catch (UsernameTakenException | AuthorizationException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
-        }catch (InvalidEmailException e){
-            return new ResponseEntity<>("Email domain doesn't exist",HttpStatus.BAD_REQUEST);
-        } catch (ResourceNotFoundException e){
-            return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch (InvalidUsernameException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
-            return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -54,11 +51,11 @@ public class AuthenticationController {
         try{
             return ResponseEntity.ok(userService.login(request));
         } catch(ResourceNotFoundException e){
-            return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
-            return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -69,6 +66,8 @@ public class AuthenticationController {
         try{
             var type = FilterType.valueOf(bloom.getType());
             return ResponseEntity.ok(userService.takenType(type,bloom.getValue()));
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
@@ -83,7 +82,9 @@ public class AuthenticationController {
         try {
             userService.sendForgetEmail(email);
             return ResponseEntity.ok().build();
-        } catch (RateLimitExceededException e){
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }  catch (RateLimitExceededException e){
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -97,6 +98,8 @@ public class AuthenticationController {
             return ResponseEntity.ok().build();
         } catch(PasswordResetException e){
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        } catch (ResourceNotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
         } catch(Exception e){

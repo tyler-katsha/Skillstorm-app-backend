@@ -19,6 +19,9 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge,Integer> {
     @Query("DELETE FROM UserBadge ub WHERE ub.badge.id = :badgeId")
     void deleteByBadgeId(@Param("badgeId") Integer badgeId);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM UserBadge ub WHERE ub.user.id = :userId")
+    void deleteByUserId(@Param("userId") int userId);
     Optional<UserBadge> findByUserAndBadge(User user, Badge badge);
     List<UserBadge> findByUser(User user);
 }

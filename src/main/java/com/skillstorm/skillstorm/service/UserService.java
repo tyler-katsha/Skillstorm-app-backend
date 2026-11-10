@@ -58,11 +58,9 @@ public class UserService {
 
     public String register(UserRegister request) {
 
-        // evicts the leaderboard from cache once a new user registers
-        leaderboardService.refreshLeaderboard();
-
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
+        if(existingUser.isEmpty()) throw new ResourceNotFoundException("User doesn't exist with email: " + request.getEmail());
 
         if(existingUser.isPresent()){
             var error = String.format("Existing user with email: %s already exist",request.getEmail());
@@ -83,6 +81,9 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
+        // evicts the leaderboard from cache once a new user registers
+        leaderboardService.refreshLeaderboard();
+
         // adds new user's details to each bloom filter (for username and email)
         addToFilters(user.getUsername(),user.getEmail());
 
@@ -100,7 +101,7 @@ public class UserService {
     public String login(UserLogin request){
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AuthorizationException("Invalid Credentials"));
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with email: " + request.getEmail()));
 
         // check if the hash matches with the one entered and in the db password
         if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
@@ -162,6 +163,8 @@ public class UserService {
 
     @Transactional
     public void delete(int userId) {
+        userBadgeService.deleteByUserId(userId);
+        userTrackerService.deleteByUserId(userId);
         userRepository.deleteById(userId);
     }
 

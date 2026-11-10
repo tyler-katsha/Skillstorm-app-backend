@@ -366,4 +366,12 @@ public class UserTrackerService {
         if (stats.getCurrentStreak() == null) stats.setCurrentStreak(NOTHING);
         if (stats.getLongestStreak() == null) stats.setLongestStreak(NOTHING);
     }
+
+    @Transactional
+    public void deleteByUserId(int userId) {
+        Optional<UserTracker> tracker = userTrackerRepository.findByUserId(userId);
+
+        if(tracker.isPresent()) userTrackerRepository.delete(tracker.get());
+        else userTrackerRepository.deleteByUserId(userId);
+    }
 }
