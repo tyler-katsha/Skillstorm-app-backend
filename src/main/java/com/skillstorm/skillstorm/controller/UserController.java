@@ -9,8 +9,10 @@ import com.skillstorm.skillstorm.dto.payloads.QuizUncompletedPayload;
 import com.skillstorm.skillstorm.dto.requests.UserUpdateRequest;
 import com.skillstorm.skillstorm.dto.responses.ProfileTrackerAPIResponse;
 import com.skillstorm.skillstorm.dto.responses.UserResponse;
+import com.skillstorm.skillstorm.exceptions.InvalidUsernameException;
 import com.skillstorm.skillstorm.exceptions.RateLimitExceededException;
 import com.skillstorm.skillstorm.exceptions.ResourceNotFoundException;
+import com.skillstorm.skillstorm.exceptions.UsernameTakenException;
 import com.skillstorm.skillstorm.oauth.UserPrincipal;
 import com.skillstorm.skillstorm.service.InspectionCacheService;
 import com.skillstorm.skillstorm.worker.QuizUncompletedQueueProcessor;
@@ -74,6 +76,10 @@ public class UserController {
             return new ResponseEntity<>("Resource not found",HttpStatus.NOT_FOUND);
         } catch (RateLimitExceededException e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.TOO_MANY_REQUESTS);
+        } catch(UsernameTakenException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch(InvalidUsernameException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         } catch(Exception e){
             return new ResponseEntity<>("Something went wrong. Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
