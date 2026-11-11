@@ -20,5 +20,6 @@ public class LeaderboardScheduler {
         log.info("Executing scheduled leaderboard update...");
 
         leaderboardService.refreshLeaderboard();
+        log.info("Updated leaderboard complete...");
     }
 }

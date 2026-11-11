@@ -44,7 +44,6 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                   .toList()
                 : List.of();
 
-        // 1. Map to DTOs instead of passing raw entities
         Set<QuizSummaryDto> completedQuizzes = tracker.getCompletedQuizzes() != null
                 ? tracker.getCompletedQuizzes().stream().map(this::mapToQuizSummary).collect(Collectors.toSet())
                 : new HashSet<>();
@@ -78,15 +77,12 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .totalQuestionsAnswered(stats.getTotalQuestionsAnswered() != null ? stats.getTotalQuestionsAnswered() : 0)
                 .totalCorrectAnswers(stats.getTotalCorrectAnswers() != null ? stats.getTotalCorrectAnswers() : 0)
                 .accuracyRate(stats.getAccuracyRate())
-                // 2. Pass the mapped DTOs into the builder
                 .completedQuizzes(completedQuizzes)
                 .uncompletedQuizzes(uncompletedQuizzes)
                 .bookmarkedQuizzes(bookmarkedQuizzes)
                 .attemptRecords(attempts)
                 .build();
     }
-
-    // ... (mapToHistory and mapBackToObj remain exactly the same as your code)
 
     public QuizAttemptResponse mapAttemptToDto(QuizAttemptRecord record) {
         if (record == null) return null;
@@ -105,7 +101,6 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .build();
     }
 
-    // 3. New Helper method to handle Quiz mapping cleanly
     private QuizSummaryDto mapToQuizSummary(Quiz quiz) {
         if (quiz == null) return null;
 
@@ -116,7 +111,7 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
         int totalQuestions = quiz.getQuestions() != null ? quiz.getQuestions().size() : 0;
 
         return QuizSummaryDto.builder()
-                .id(quiz.getQuizId()) // Assuming the ID field is getQuizId() based on your other code
+                .id(quiz.getQuizId())
                 .title(quiz.getTitle())
                 .topicNames(topicNames)
                 .totalQuestions(totalQuestions)
@@ -139,18 +134,12 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with id: " + request.getUserId()));
 
-        Set<Quiz> completed = request.getCompletedQuizId() != null
-                ? new HashSet<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId())))
-                : new HashSet<>();
+        Set<Quiz> completed = request.getCompletedQuizId() != null ? new HashSet<>(quizRepository.findAllById(Set.of(request.getCompletedQuizId()))) : Collections.emptySet();
 
-        Set<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty())
-                ? new HashSet<>(quizRepository.findAllById(request.getBookmarkedQuizIds()))
-                : new HashSet<>();
+        Set<Quiz> bookmarked = (request.getBookmarkedQuizIds() != null && !request.getBookmarkedQuizIds().isEmpty()) ? new HashSet<>(quizRepository.findAllById(request.getBookmarkedQuizIds())) : Collections.emptySet();
 
         int gainedXp = request.getGainedXp() != null ? request.getGainedXp() : 0;
-        int calculatedLevel = request.getCurrentLevel() != null
-                ? request.getCurrentLevel()
-                : 1 + (gainedXp / 1000);
+        int calculatedLevel = request.getCurrentLevel() != null ? request.getCurrentLevel() : 1 + (gainedXp / 1000);
 
         UserOverallStats stats = UserOverallStats.builder()
                 .totalQuizzesCompleted(1)
@@ -175,7 +164,6 @@ public class UserTrackerMapperImpl implements UserTrackerMapper {
                 .attemptRecords(new ArrayList<>())
                 .build();
 
-        // Map each Quiz ID into an UncompletedQuizProgress entity linked to this tracker
         if (request.getUncompletedQuizIds() != null && !request.getUncompletedQuizIds().isEmpty()) {
             Set<UncompletedQuizProgress> uncompleted = quizRepository.findAllById(request.getUncompletedQuizIds())
                     .stream()
