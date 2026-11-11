@@ -72,7 +72,7 @@ public class UserService {
         if(!emailService.hasMXRecord(request.getEmail())){
             throw new InvalidEmailException("Email domain is invalid");
         }
-        if(isUsernameTaken(user.getUsername())) throw new UsernameTakenException(String.format("%s already exist",user.getUsername()));
+        if(isUsernameTaken(user.getUsername())) throw new UsernameTakenException("Username is already takengi");
 
         if(!isValidUsername(user.getUsername())) throw new InvalidUsernameException("malformed username detected: " + user.getUsername());
 
