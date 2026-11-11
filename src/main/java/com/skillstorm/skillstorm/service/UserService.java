@@ -145,7 +145,7 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist"));
 
-        if(isUsernameTaken(request.getUsername())) throw new UsernameTakenException(String.format("%s already exist",request.getUsername()));
+        if(isUsernameTaken(request.getUsername())) throw new UsernameTakenException("Username is already taken");
         if(!isValidUsername(request.getUsername())) throw new InvalidUsernameException("malformed username detected: " + request.getUsername());
 
         existingUser.setUsername(request.getUsername());
