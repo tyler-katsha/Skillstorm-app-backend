@@ -60,8 +60,6 @@ public class UserService {
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
-        if(existingUser.isEmpty()) throw new ResourceNotFoundException("User doesn't exist with email: " + request.getEmail());
-
         if(existingUser.isPresent()){
             var error = String.format("Existing user with email: %s already exist",request.getEmail());
             throw new AuthorizationException(error);
